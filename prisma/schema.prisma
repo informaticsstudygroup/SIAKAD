@@ -1,0 +1,412 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ================= Enums =================
+
+enum Role {
+  ADMIN
+  MENTOR
+  CO_MENTOR
+  PARTICIPANT
+  ADVISOR
+}
+
+enum AccountStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  REVISION_REQUIRED
+  DISABLED
+}
+
+enum MeetingCategory {
+  KELAS
+  WORKSHOP
+  SHARING_SESSION
+  EVENT
+  PROJECT
+}
+
+enum AttendanceStatus {
+  HADIR
+  IZIN
+  TIDAK_HADIR
+}
+
+enum AssignmentCategory {
+  TUGAS
+  PROYEK
+}
+
+enum SubmissionStatus {
+  BELUM_DIKUMPULKAN
+  SUDAH_DIKUMPULKAN
+  TERLAMBAT
+  SUDAH_DINILAI
+}
+
+enum QuizStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+}
+
+enum CertificateStatus {
+  BELUM_MEMENUHI_SYARAT
+  MEMENUHI_SYARAT
+  TERBIT
+}
+
+enum ProgramType {
+  KELAS_REGULER
+  KOLABORASI_PROYEK
+  WORKSHOP
+  SHARING_SESSION
+  KOMPETISI_INTERNAL
+}
+
+enum EventRegistrationStatus {
+  TERDAFTAR
+  WAITLIST
+  DIBATALKAN
+}
+
+enum ContentStatus {
+  DRAFT
+  TERJADWAL
+  TERBIT
+}
+
+// ================= Auth & Users =================
+
+model User {
+  id           String        @id @default(cuid())
+  name         String
+  email        String        @unique
+  passwordHash String
+  role         Role
+  status       AccountStatus @default(VERIFIED)
+  phone        String?
+  photoUrl     String?
+  bio          String?
+  position     String? // jabatan untuk mentor / co-mentor / advisor
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  participantProfile ParticipantProfile?
+
+  mentoredBatches      Batch[]             @relation("BatchMentor")
+  coMentoredBatches    Batch[]             @relation("BatchCoMentor")
+  meetingsCreated      Meeting[]           @relation("MeetingMentor")
+  assignmentsCreated   Assignment[]        @relation("AssignmentMentor")
+  submissionsGraded    Submission[]        @relation("SubmissionGrader")
+  quizzesCreated       Quiz[]              @relation("QuizCreator")
+  verificationActions  VerificationLog[]   @relation("VerificationActor")
+  eventRegistrations   EventRegistration[]
+  announcementsCreated Announcement[]      @relation("AnnouncementAuthor")
+
+  @@map("users")
+}
+
+model ParticipantProfile {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  registrationNumber String   @unique
+  studentId          String   @unique // NIM, dipakai sebagai identitas login peserta
+  studyProgram       String
+  semester           Int
+  reason             String?  @db.Text
+  techInterests      String[]
+  batchId            String?
+  batch              Batch?   @relation(fields: [batchId], references: [id])
+  verificationNotes  String?  @db.Text
+  registeredAt       DateTime @default(now())
+
+  attendances      Attendance[]
+  submissions      Submission[]
+  quizAttempts     QuizAttempt[]
+  certificates     Certificate[]
+  verificationLogs VerificationLog[]
+
+  @@map("participant_profiles")
+}
+
+model VerificationLog {
+  id            String             @id @default(cuid())
+  participantId String
+  participant   ParticipantProfile @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  status        AccountStatus
+  note          String?            @db.Text
+  actedById     String?
+  actedBy       User?              @relation("VerificationActor", fields: [actedById], references: [id])
+  createdAt     DateTime           @default(now())
+
+  @@map("verification_logs")
+}
+
+// ================= Batch & Learning Activities =================
+
+model Batch {
+  id         String   @id @default(cuid())
+  name       String
+  period     String
+  startDate  DateTime
+  endDate    DateTime
+  capacity   Int
+  isActive   Boolean  @default(true)
+  mentorId   String?
+  mentor     User?    @relation("BatchMentor", fields: [mentorId], references: [id])
+  coMentorId String?
+  coMentor   User?    @relation("BatchCoMentor", fields: [coMentorId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  participants ParticipantProfile[]
+  meetings     Meeting[]
+  quizzes      Quiz[]
+  certificates Certificate[]
+
+  @@map("batches")
+}
+
+model Meeting {
+  id          String          @id @default(cuid())
+  title       String
+  category    MeetingCategory
+  batchId     String
+  batch       Batch           @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  mentorId    String?
+  mentor      User?           @relation("MeetingMentor", fields: [mentorId], references: [id])
+  date        DateTime
+  startTime   DateTime
+  endTime     DateTime
+  location    String?
+  meetingLink String?
+  description String?         @db.Text
+  materialUrl String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  attendances Attendance[]
+  assignments Assignment[]
+
+  @@map("meetings")
+}
+
+model Attendance {
+  id            String             @id @default(cuid())
+  meetingId     String
+  meeting       Meeting            @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  participantId String
+  participant   ParticipantProfile @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  status        AttendanceStatus
+  notes         String?
+  recordedAt    DateTime           @default(now())
+
+  @@unique([meetingId, participantId])
+  @@map("attendances")
+}
+
+// ================= Assignments & Grading =================
+
+model Assignment {
+  id            String             @id @default(cuid())
+  title         String
+  category      AssignmentCategory @default(TUGAS)
+  description   String             @db.Text
+  meetingId     String?
+  meeting       Meeting?           @relation(fields: [meetingId], references: [id])
+  mentorId      String
+  mentor        User               @relation("AssignmentMentor", fields: [mentorId], references: [id])
+  deadline      DateTime
+  attachmentUrl String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  submissions Submission[]
+
+  @@map("assignments")
+}
+
+model Submission {
+  id            String             @id @default(cuid())
+  assignmentId  String
+  assignment    Assignment         @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  participantId String
+  participant   ParticipantProfile @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  fileUrl       String // hanya .zip
+  status        SubmissionStatus   @default(SUDAH_DIKUMPULKAN)
+  score         Float?
+  feedback      String?            @db.Text
+  gradedById    String?
+  gradedBy      User?              @relation("SubmissionGrader", fields: [gradedById], references: [id])
+  submittedAt   DateTime           @default(now())
+  gradedAt      DateTime?
+
+  @@unique([assignmentId, participantId])
+  @@map("submissions")
+}
+
+// ================= Quiz =================
+
+model Quiz {
+  id              String     @id @default(cuid())
+  title           String
+  topic           String
+  instructions    String?    @db.Text
+  durationMinutes Int
+  startAt         DateTime
+  endAt           DateTime
+  batchId         String
+  batch           Batch      @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  status          QuizStatus @default(DRAFT)
+  createdById     String
+  createdBy       User       @relation("QuizCreator", fields: [createdById], references: [id])
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  questions Question[]
+  attempts  QuizAttempt[]
+
+  @@map("quizzes")
+}
+
+model Question {
+  id            String @id @default(cuid())
+  quizId        String
+  quiz          Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  text          String @db.Text
+  options       Json // [{ id: string, text: string }]
+  correctOption String
+  points        Int    @default(1)
+  order         Int
+
+  @@map("questions")
+}
+
+model QuizAttempt {
+  id            String             @id @default(cuid())
+  quizId        String
+  quiz          Quiz               @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  participantId String
+  participant   ParticipantProfile @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  answers       Json // { [questionId]: optionId }
+  score         Float?
+  startedAt     DateTime           @default(now())
+  submittedAt   DateTime?
+
+  @@unique([quizId, participantId])
+  @@map("quiz_attempts")
+}
+
+// ================= Certificate =================
+
+model Certificate {
+  id                String            @id @default(cuid())
+  participantId     String
+  participant       ParticipantProfile @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  batchId           String
+  batch             Batch             @relation(fields: [batchId], references: [id])
+  certificateNumber String            @unique
+  fileUrl           String?
+  status            CertificateStatus @default(BELUM_MEMENUHI_SYARAT)
+  issueDate         DateTime?
+  createdAt         DateTime          @default(now())
+
+  @@map("certificates")
+}
+
+// ================= Public Website Content =================
+
+model Program {
+  id          String      @id @default(cuid())
+  title       String
+  type        ProgramType
+  description String      @db.Text
+  level       String?
+  icon        String?
+  isPublished Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  events Event[]
+
+  @@map("programs")
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  category    String
+  description String   @db.Text
+  bannerUrl   String?
+  startAt     DateTime
+  endAt       DateTime
+  location    String?
+  isOnline    Boolean  @default(false)
+  quota       Int?
+  programId   String?
+  program     Program? @relation(fields: [programId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  registrations EventRegistration[]
+
+  @@map("events")
+}
+
+model EventRegistration {
+  id           String                   @id @default(cuid())
+  eventId      String
+  event        Event                    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status       EventRegistrationStatus  @default(TERDAFTAR)
+  registeredAt DateTime                 @default(now())
+
+  @@unique([eventId, userId])
+  @@map("event_registrations")
+}
+
+model Announcement {
+  id          String        @id @default(cuid())
+  title       String
+  content     String        @db.Text
+  status      ContentStatus @default(DRAFT)
+  publishedAt DateTime?
+  createdById String
+  createdBy   User          @relation("AnnouncementAuthor", fields: [createdById], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("announcements")
+}
+
+model Testimonial {
+  id          String   @id @default(cuid())
+  name        String
+  batchLabel  String?
+  content     String   @db.Text
+  photoUrl    String?
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@map("testimonials")
+}
+
+model GalleryItem {
+  id           String   @id @default(cuid())
+  title        String
+  category     String // Kelas, Workshop, Event, Project
+  imageUrl     String
+  activityDate DateTime
+  createdAt    DateTime @default(now())
+
+  @@map("gallery_items")
+}
