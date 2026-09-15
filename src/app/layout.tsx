@@ -12,7 +12,7 @@ const jakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: {
     default: "Informatics Study Group SIAKAD",
-    template: "%s — Informatics Study Group SIAKAD",
+    template: "%s | Informatics Study Group SIAKAD",
   },
   description:
     "Platform komunitas belajar Informatics Study Group (ISG): kelas, tugas, kuis, dan sertifikat dalam satu tempat.",
