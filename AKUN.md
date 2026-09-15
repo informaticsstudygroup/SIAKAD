@@ -183,11 +183,43 @@ email atau NIM mana yang terdaftar.
 mereka memang belum punya akses. Admin tetap bisa menyetel ulang kata sandi
 siapa pun dari `/dashboard/akun`.
 
-Setelah kata sandi berganti, satu email pemberitahuan dikirim — supaya pemilik
+Setelah kata sandi berganti, satu email pemberitahuan dikirim, supaya pemilik
 akun tahu kalau ternyata bukan dia yang melakukannya.
 
 Pengguna yang **masih bisa masuk** dapat mengganti kata sandinya sendiri di
 `/dashboard/profil`, dan di sana kata sandi lama wajib dicocokkan dulu.
+
+### Pengiriman email: jangan pakai SMTP di Railway
+
+`EMAIL_PROVIDER` **harus** `resend` di produksi.
+
+Railway menutup koneksi SMTP keluar, jadi pengiriman lewat `smtp.gmail.com`
+menggantung sampai `Connection timeout`. Kredensial Gmail yang benar sekalipun
+tidak menolong, dan gejalanya menyesatkan: antarmuka tetap melaporkan berhasil
+sementara log server berisi
+`[EMAIL] pengiriman lewat smtp gagal: Connection timeout`. Hanya penyedia
+berbasis HTTPS yang bisa keluar dari Railway.
+
+`EMAIL_PROVIDER=smtp` tetap berguna untuk pengembangan di komputer sendiri,
+karena di sana port SMTP terbuka.
+
+Variabel yang dipakai di produksi:
+
+| Variabel | Nilai |
+|---|---|
+| `EMAIL_PROVIDER` | `resend` |
+| `RESEND_API_KEY` | kunci dari dasbor Resend |
+| `RESEND_FROM_EMAIL` | `Informatics Study Group <noreply@informaticstudygroup.web.id>` |
+| `EMAIL_REPLY_TO` | `informaticsstudygroup@gmail.com` |
+
+Alamat pengirim wajib memuat `@`. Kalau isinya hanya nama, Resend menolaknya
+dengan `HTTP 422 Invalid \`from\` field`; kode sekarang memasangkannya otomatis
+dengan alamat yang diketahui, tapi lebih baik diisi lengkap sejak awal.
+
+Perlu diketahui saat memeriksa: perintah `railway variables` **menyembunyikan
+bagian `<alamat>`** saat menampilkan nilainya, sehingga terlihat seolah hanya
+berisi nama. Untuk melihat nilai sebenarnya, pakai
+`railway run -- node -e "console.log(process.env.RESEND_FROM_EMAIL)"`.
 
 ## 7. Catatan keamanan
 
