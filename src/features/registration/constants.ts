@@ -4,6 +4,20 @@
  * ekspor modul ikut hilang saat build.
  */
 
+/**
+ * Apakah email pendaftar WAJIB memakai domain kampus.
+ *
+ * Dimatikan dengan sengaja. Identitas mahasiswa sudah dijaga oleh NIM yang
+ * wajib dan unik, ditambah verifikasi manual Admin — jadi syarat domain email
+ * hampir tidak menambah keamanan, tapi menambah satu titik gagal: Google
+ * Workspace kampus bisa mengarantina email dari pengirim luar, dan email yang
+ * tertahan tidak terlihat sama sekali oleh mahasiswa, sehingga dia tidak
+ * pernah menerima pemberitahuan aktivasi maupun tautan reset kata sandi.
+ *
+ * Ubah ke true untuk mewajibkannya kembali.
+ */
+export const REQUIRE_CAMPUS_EMAIL = false;
+
 /** Domain email kampus. Ubah di satu tempat ini kalau kampusnya bertambah. */
 export const CAMPUS_EMAIL_DOMAIN = "@unikadelasalle.ac.id";
 

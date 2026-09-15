@@ -109,7 +109,7 @@ memverifikasinya di `/dashboard/pendaftar`.
 |---|---|
 | Nama | Minimal 3 huruf |
 | NIM | Hanya angka, 6–15 digit, belum pernah dipakai |
-| Email | **Wajib email kampus** `@unikadelasalle.ac.id`, belum pernah dipakai |
+| Email | Email pribadi apa pun yang aktif, belum pernah dipakai |
 | Telepon | 9–16 digit |
 | Semester | 1–14 |
 | Alasan bergabung | **Wajib**, minimal 20 karakter |
@@ -117,12 +117,26 @@ memverifikasinya di `/dashboard/pendaftar`.
 | Foto profil | Opsional, dikecilkan jadi 256×256 JPEG |
 | Kata sandi | Minimal 8 karakter |
 
-Domain email kampus diatur di
-[`src/features/registration/constants.ts`](src/features/registration/constants.ts).
+### Kenapa bukan email kampus
+
+`REQUIRE_CAMPUS_EMAIL` di
+[`src/features/registration/constants.ts`](src/features/registration/constants.ts)
+sengaja `false`. Alasannya bukan teknis pengiriman — kirim ke
+`@unikadelasalle.ac.id` sebenarnya diterima server (`250 2.0.0 OK`, nol
+penolakan) — tapi karena **karantina admin Google Workspace** kampus menahan
+email dari pengirim luar sebelum sampai kotak masuk. Gejalanya: email tidak
+muncul sama sekali, di folder Spam pun tidak ada. Hanya admin IT kampus yang
+bisa melepaskannya, jadi peserta bisa tidak pernah menerima pemberitahuan
+aktivasi maupun tautan reset kata sandi.
+
+Identitas mahasiswa tetap terjaga tanpa syarat ini: **NIM wajib, unik, dan
+setiap pendaftar diverifikasi manual** oleh Admin. Ubah konstanta itu ke `true`
+untuk mewajibkan domain kampus kembali — validasi klien dan server keduanya
+ikut berubah dari satu tempat itu.
 
 Setelah pendaftar diverifikasi dan ditempatkan ke angkatan oleh Admin di
 `/dashboard/pendaftar`, sistem otomatis mengirim email penerimaan ke email
-kampus pendaftar berisi NIM, email, dan angkatannya.
+pendaftar berisi NIM, email, dan angkatannya.
 
 **Email tidak pernah memuat kata sandi.** Peserta memakai kata sandi yang dia
 buat sendiri saat mendaftar. Mengirim kredensial bersama tautan masuk adalah

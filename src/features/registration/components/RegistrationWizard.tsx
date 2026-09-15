@@ -8,7 +8,11 @@ import {
   registerAction,
   type RegisterFormState,
 } from "@/features/registration/actions/register-action";
-import { CAMPUS_EMAIL_DOMAIN, REASON_MIN } from "@/features/registration/constants";
+import {
+  CAMPUS_EMAIL_DOMAIN,
+  REASON_MIN,
+  REQUIRE_CAMPUS_EMAIL,
+} from "@/features/registration/constants";
 import { PhotoPicker } from "@/features/registration/components/PhotoPicker";
 import { cn } from "@/utils/cn";
 
@@ -47,8 +51,13 @@ function validate(values: Values): Partial<Record<keyof Values, string>> {
   if (!/^\d{6,15}$/.test(values.studentId.trim()))
     errors.studentId = "NIM hanya berisi angka, 6 sampai 15 digit.";
   if (!values.email.trim()) {
-    errors.email = "Email kampus wajib diisi.";
-  } else if (!values.email.trim().toLowerCase().endsWith(CAMPUS_EMAIL_DOMAIN)) {
+    errors.email = "Email wajib diisi.";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(values.email.trim())) {
+    errors.email = "Format email belum benar, contoh: nama@gmail.com.";
+  } else if (
+    REQUIRE_CAMPUS_EMAIL &&
+    !values.email.trim().toLowerCase().endsWith(CAMPUS_EMAIL_DOMAIN)
+  ) {
     errors.email = `Wajib email kampus, berakhiran ${CAMPUS_EMAIL_DOMAIN}.`;
   }
   if (!/^[\d+\s-]{9,16}$/.test(values.phone.trim()))
@@ -157,16 +166,24 @@ export function RegistrationWizard() {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field
-                label="Email Kampus"
+                label="Email Aktif"
                 htmlFor="email"
                 error={showError("email")}
-                hint={`Wajib berakhiran ${CAMPUS_EMAIL_DOMAIN}`}
+                hint={
+                  REQUIRE_CAMPUS_EMAIL
+                    ? `Wajib berakhiran ${CAMPUS_EMAIL_DOMAIN}`
+                    : "Pakai email yang paling sering kamu buka — ke sini kami kirim aktivasi akun."
+                }
               >
                 <input
                   id="email"
                   type="email"
                   autoComplete="email"
-                  placeholder={`nama${CAMPUS_EMAIL_DOMAIN}`}
+                  placeholder={
+                    REQUIRE_CAMPUS_EMAIL
+                      ? `nama${CAMPUS_EMAIL_DOMAIN}`
+                      : "nama@gmail.com"
+                  }
                   value={values.email}
                   onChange={(e) => set("email", e.target.value)}
                   onBlur={() => markTouched("email")}
@@ -252,7 +269,7 @@ export function RegistrationWizard() {
               <dl className="grid grid-cols-1 gap-x-8 gap-y-4 border-t border-isg-line pt-4 sm:grid-cols-2">
                 <Row label="Nama" value={values.name} />
                 <Row label="NIM" value={values.studentId} />
-                <Row label="Email kampus" value={values.email} />
+                <Row label="Email" value={values.email} />
                 <Row label="Telepon" value={values.phone} />
                 <Row label="Semester" value={`Semester ${values.semester}`} />
                 <Row

@@ -10,6 +10,7 @@ import {
   DEFAULT_STUDY_PROGRAM,
   MAX_PHOTO_CHARS,
   REASON_MIN,
+  REQUIRE_CAMPUS_EMAIL,
 } from "@/features/registration/constants";
 
 const registerSchema = z
@@ -21,9 +22,12 @@ const registerSchema = z
       .regex(/^\d{6,15}$/, "NIM hanya berisi angka, 6 sampai 15 digit."),
     email: z
       .email("Format email tidak valid.")
-      .refine((value) => value.toLowerCase().endsWith(CAMPUS_EMAIL_DOMAIN), {
-        message: `Gunakan email kampus yang berakhiran ${CAMPUS_EMAIL_DOMAIN}.`,
-      }),
+      .refine(
+        (value) =>
+          !REQUIRE_CAMPUS_EMAIL ||
+          value.toLowerCase().endsWith(CAMPUS_EMAIL_DOMAIN),
+        { message: `Gunakan email kampus yang berakhiran ${CAMPUS_EMAIL_DOMAIN}.` },
+      ),
     phone: z
       .string()
       .trim()

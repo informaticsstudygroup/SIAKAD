@@ -58,7 +58,7 @@ export function ForgotPasswordForm() {
           name="identifier"
           required
           autoComplete="username"
-          placeholder="nama@unikadelasalle.ac.id atau 2211523001"
+          placeholder="nama@gmail.com atau 2211523001"
           className="h-12 w-full rounded-2xl border border-isg-line bg-isg-surface px-4 text-sm text-isg-ink outline-none transition-colors placeholder:text-isg-muted/70 focus:border-isg-blue focus:ring-4 focus:ring-isg-blue/15"
         />
         <p className="text-xs text-isg-muted">
