@@ -86,34 +86,52 @@ enum ContentStatus {
 // ================= Auth & Users =================
 
 model User {
-  id           String        @id @default(cuid())
-  name         String
-  email        String        @unique
-  passwordHash String
-  mustChangePassword Boolean @default(false)
-  role         Role
-  status       AccountStatus @default(VERIFIED)
-  phone        String?
-  photoUrl     String?
-  bio          String?
-  position     String? // jabatan untuk mentor / co-mentor / advisor
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  id                 String        @id @default(cuid())
+  name               String
+  email              String        @unique
+  passwordHash       String
+  mustChangePassword Boolean       @default(false)
+  role               Role
+  status             AccountStatus @default(VERIFIED)
+  phone              String?
+  photoUrl           String?
+  bio                String?
+  position           String? // jabatan untuk mentor / co-mentor / advisor
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
 
   participantProfile ParticipantProfile?
 
-  mentoredBatches      Batch[]             @relation("BatchMentor")
-  coMentoredBatches    Batch[]             @relation("BatchCoMentor")
-  meetingsCreated      Meeting[]           @relation("MeetingMentor")
-  assignmentsCreated   Assignment[]        @relation("AssignmentMentor")
-  submissionsGraded    Submission[]        @relation("SubmissionGrader")
-  quizzesCreated       Quiz[]              @relation("QuizCreator")
-  verificationActions  VerificationLog[]   @relation("VerificationActor")
+  mentoredBatches      Batch[]              @relation("BatchMentor")
+  coMentoredBatches    Batch[]              @relation("BatchCoMentor")
+  meetingsCreated      Meeting[]            @relation("MeetingMentor")
+  assignmentsCreated   Assignment[]         @relation("AssignmentMentor")
+  submissionsGraded    Submission[]         @relation("SubmissionGrader")
+  quizzesCreated       Quiz[]               @relation("QuizCreator")
+  verificationActions  VerificationLog[]    @relation("VerificationActor")
   eventRegistrations   EventRegistration[]
-  announcementsCreated Announcement[]      @relation("AnnouncementAuthor")
+  announcementsCreated Announcement[]       @relation("AnnouncementAuthor")
+  passwordResetTokens  PasswordResetToken[]
 
   @@index([role, status])
   @@map("users")
+}
+
+/// Token sekali pakai untuk pemulihan kata sandi lewat email.
+/// Token mentah hanya ada di tautan email; di basis data disimpan hash-nya,
+/// jadi kebocoran isi tabel tidak memberi siapa pun akses masuk.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("password_reset_tokens")
 }
 
 model ParticipantProfile {

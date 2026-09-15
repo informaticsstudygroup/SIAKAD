@@ -121,9 +121,13 @@ Domain email kampus diatur di
 [`src/features/registration/constants.ts`](src/features/registration/constants.ts).
 
 Setelah pendaftar diverifikasi dan ditempatkan ke angkatan oleh Admin di
-`/dashboard/pendaftar`, sistem otomatis mengirimkan **email konfirmasi penerimaan
-dan rincian akun** ke email kampus pendaftar, berisi NIM (identitas login utama),
-email, kata sandi, dan angkatan yang ditentukan.
+`/dashboard/pendaftar`, sistem otomatis mengirim email penerimaan ke email
+kampus pendaftar berisi NIM, email, dan angkatannya.
+
+**Email tidak pernah memuat kata sandi.** Peserta memakai kata sandi yang dia
+buat sendiri saat mendaftar. Mengirim kredensial bersama tautan masuk adalah
+pola yang dikenali Gmail sebagai phishing dan membuat email mendarat di Spam,
+selain meninggalkan kata sandi di kotak surat penerima selamanya.
 
 ### Staf — lewat Manajemen Akun
 
@@ -141,18 +145,35 @@ diubah dari situ karena terikat pendaftaran dan angkatan.
 
 ## 6. Lupa kata sandi
 
-Belum ada pemulihan otomatis karena proyek ini belum punya layanan pengiriman
-email. `/forgot-password` mengarahkan pengguna menghubungi Admin, lalu Admin
-menyetel ulang lewat `/dashboard/akun`.
-Sistem telah memiliki layanan pengiriman email (`src/lib/email/transporter.ts`)
-yang aktif via konfigurasi SMTP di `.env`. `/forgot-password` saat ini
-mengarahkan pengguna menghubungi Admin, lalu Admin menyetel ulang lewat
-`/dashboard/akun`.
+Pemulihan berjalan otomatis lewat email, tanpa perlu menunggu Admin.
+
+1. Pengguna membuka `/forgot-password` dan memasukkan **email atau NIM**.
+2. Sistem mengirim tautan sekali pakai ke email terdaftar.
+3. Tautan membuka `/reset-password?token=...` untuk memilih kata sandi baru.
+
+| Aturan | Nilai |
+|---|---|
+| Masa berlaku tautan | 60 menit |
+| Jumlah pemakaian | sekali; tautan langsung hangus setelah dipakai |
+| Tautan lama | otomatis hangus saat tautan baru diminta |
+| Penyimpanan token | hanya hash SHA-256 di basis data, token mentah cuma ada di email |
+
+Dua hal yang disengaja:
+
+**Jawabannya selalu sama** — baik akunnya ada maupun tidak, halaman selalu
+menampilkan "Tautan sudah dikirim". Ini mencegah orang luar menebak alamat
+email atau NIM mana yang terdaftar.
+
+**Akun yang belum `VERIFIED` tidak dikirimi tautan.** Pendaftar yang masih
+`PENDING`, ditolak, atau dinonaktifkan tidak bisa memulihkan kata sandi;
+mereka memang belum punya akses. Admin tetap bisa menyetel ulang kata sandi
+siapa pun dari `/dashboard/akun`.
+
+Setelah kata sandi berganti, satu email pemberitahuan dikirim — supaya pemilik
+akun tahu kalau ternyata bukan dia yang melakukannya.
 
 Pengguna yang **masih bisa masuk** dapat mengganti kata sandinya sendiri di
-`/dashboard/profil` — dan di sana kata sandi lama wajib dicocokkan dulu.
-
----
+`/dashboard/profil`, dan di sana kata sandi lama wajib dicocokkan dulu.
 
 ## 7. Catatan keamanan
 
