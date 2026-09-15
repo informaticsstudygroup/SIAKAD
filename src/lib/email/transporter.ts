@@ -50,7 +50,21 @@ function smtpConfig() {
   };
 }
 
+/**
+ * Penyedia bisa dipaksa lewat EMAIL_PROVIDER: "smtp" | "resend" | "auto".
+ *
+ * Ini bukan sekadar kenyamanan. Domain pengirim yang baru didaftarkan belum
+ * punya reputasi, dan Gmail mengarantina emailnya tanpa jejak meski SPF, DKIM,
+ * dan DMARC sudah benar. Selama masa pemanasan itu, mengirim lewat SMTP Gmail
+ * jauh lebih pasti sampai. Setelah domain cukup hangat, cukup ubah nilainya
+ * kembali ke "resend" tanpa menyentuh kode.
+ */
 export function getEmailProvider(): "resend" | "smtp" | null {
+  const paksa = (process.env.EMAIL_PROVIDER ?? "auto").toLowerCase();
+
+  if (paksa === "smtp") return smtpConfig() ? "smtp" : null;
+  if (paksa === "resend") return resendConfig() ? "resend" : null;
+
   if (resendConfig()) return "resend";
   if (smtpConfig()) return "smtp";
   return null;
@@ -113,7 +127,7 @@ export async function sendEmail({
     // admin mengira peserta sudah diberi tahu padahal tidak ada yang terkirim.
     if (process.env.NODE_ENV === "production") {
       const message =
-        "Email belum dikonfigurasi di server. Isi RESEND_API_KEY + RESEND_FROM_EMAIL, atau SMTP_HOST + SMTP_USER + SMTP_PASS.";
+        `Email belum dikonfigurasi di server (EMAIL_PROVIDER=${process.env.EMAIL_PROVIDER ?? "auto"}). Isi RESEND_API_KEY + RESEND_FROM_EMAIL, atau SMTP_HOST + SMTP_USER + SMTP_PASS.`;
       console.error("[EMAIL] " + message);
       return { success: false, provider: "mock", error: message };
     }
