@@ -46,7 +46,7 @@ export async function loginAction(
         case "CallbackRouteError":
           return {
             error:
-              "Server sedang tidak bisa menghubungi database. Ini bukan kesalahan kata sandimu — coba lagi beberapa saat lagi.",
+              "Server sedang tidak bisa menghubungi database. Ini bukan kesalahan kata sandimu, coba lagi beberapa saat lagi.",
           };
         default:
           return { error: "Terjadi kesalahan saat masuk. Silakan coba lagi." };

@@ -62,7 +62,7 @@ export default function LoginPage() {
               className="h-auto w-full max-w-md"
             />
             <p className="max-w-sm text-lg text-isg-ink-soft">
-              Lanjutkan progres belajarmu — jadwal, tugas, kuis, dan sertifikat
+              Lanjutkan progres belajarmu: jadwal, tugas, kuis, dan sertifikat
               dalam satu tempat.
             </p>
           </div>

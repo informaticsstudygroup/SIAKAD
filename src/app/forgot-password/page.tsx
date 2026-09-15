@@ -34,7 +34,7 @@ export default function ForgotPasswordPage() {
           </h1>
           <p className="mb-7 mt-2 text-sm text-isg-ink-soft">
             Masukkan email atau NIM-mu. Kami kirimkan tautan untuk memilih kata sandi
-            baru — tanpa perlu menunggu Admin.
+            baru tanpa perlu menunggu Admin.
           </p>
 
           <ForgotPasswordForm />
