@@ -1,5 +1,8 @@
 [build]
 builder = "NIXPACKS"
+# Versi Node ditentukan lewat engines.node di package.json dan .nvmrc.
+# Next.js 16 butuh >=20.9 dan Prisma 7 butuh >=22.12; tanpa itu Nixpacks
+# menebak Node 18 dan `npm ci` gagal.
 buildCommand = "npm run build"
 
 [deploy]
