@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
 }
 
 datasource db {
@@ -89,6 +90,7 @@ model User {
   name         String
   email        String        @unique
   passwordHash String
+  mustChangePassword Boolean @default(false)
   role         Role
   status       AccountStatus @default(VERIFIED)
   phone        String?
@@ -110,6 +112,7 @@ model User {
   eventRegistrations   EventRegistration[]
   announcementsCreated Announcement[]      @relation("AnnouncementAuthor")
 
+  @@index([role, status])
   @@map("users")
 }
 
@@ -134,6 +137,7 @@ model ParticipantProfile {
   certificates     Certificate[]
   verificationLogs VerificationLog[]
 
+  @@index([batchId])
   @@map("participant_profiles")
 }
 
@@ -147,6 +151,7 @@ model VerificationLog {
   actedBy       User?              @relation("VerificationActor", fields: [actedById], references: [id])
   createdAt     DateTime           @default(now())
 
+  @@index([participantId])
   @@map("verification_logs")
 }
 
@@ -172,6 +177,7 @@ model Batch {
   quizzes      Quiz[]
   certificates Certificate[]
 
+  @@index([isActive])
   @@map("batches")
 }
 
@@ -190,12 +196,19 @@ model Meeting {
   meetingLink String?
   description String?         @db.Text
   materialUrl String?
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+
+  // Presensi berbasis QR: mentor membuka sesi, QR di layar berganti tiap
+  // beberapa detik agar tangkapan layar tidak bisa dipakai ulang.
+  attendanceOpen     Boolean   @default(false)
+  attendanceOpenedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   attendances Attendance[]
   assignments Assignment[]
 
+  @@index([batchId, date])
   @@map("meetings")
 }
 
@@ -210,6 +223,7 @@ model Attendance {
   recordedAt    DateTime           @default(now())
 
   @@unique([meetingId, participantId])
+  @@index([participantId])
   @@map("attendances")
 }
 
@@ -231,6 +245,8 @@ model Assignment {
 
   submissions Submission[]
 
+  @@index([meetingId])
+  @@index([deadline])
   @@map("assignments")
 }
 
@@ -250,6 +266,7 @@ model Submission {
   gradedAt      DateTime?
 
   @@unique([assignmentId, participantId])
+  @@index([participantId])
   @@map("submissions")
 }
 
@@ -274,6 +291,7 @@ model Quiz {
   questions Question[]
   attempts  QuizAttempt[]
 
+  @@index([batchId, status])
   @@map("quizzes")
 }
 
@@ -287,6 +305,7 @@ model Question {
   points        Int    @default(1)
   order         Int
 
+  @@index([quizId, order])
   @@map("questions")
 }
 
@@ -302,23 +321,26 @@ model QuizAttempt {
   submittedAt   DateTime?
 
   @@unique([quizId, participantId])
+  @@index([participantId])
   @@map("quiz_attempts")
 }
 
 // ================= Certificate =================
 
 model Certificate {
-  id                String            @id @default(cuid())
+  id                String             @id @default(cuid())
   participantId     String
   participant       ParticipantProfile @relation(fields: [participantId], references: [id], onDelete: Cascade)
   batchId           String
-  batch             Batch             @relation(fields: [batchId], references: [id])
-  certificateNumber String            @unique
+  batch             Batch              @relation(fields: [batchId], references: [id])
+  certificateNumber String             @unique
   fileUrl           String?
-  status            CertificateStatus @default(BELUM_MEMENUHI_SYARAT)
+  status            CertificateStatus  @default(BELUM_MEMENUHI_SYARAT)
   issueDate         DateTime?
-  createdAt         DateTime          @default(now())
+  createdAt         DateTime           @default(now())
 
+  @@index([participantId])
+  @@index([batchId])
   @@map("certificates")
 }
 
@@ -358,19 +380,21 @@ model Event {
 
   registrations EventRegistration[]
 
+  @@index([programId])
   @@map("events")
 }
 
 model EventRegistration {
-  id           String                   @id @default(cuid())
+  id           String                  @id @default(cuid())
   eventId      String
-  event        Event                    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  event        Event                   @relation(fields: [eventId], references: [id], onDelete: Cascade)
   userId       String
-  user         User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status       EventRegistrationStatus  @default(TERDAFTAR)
-  registeredAt DateTime                 @default(now())
+  user         User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status       EventRegistrationStatus @default(TERDAFTAR)
+  registeredAt DateTime                @default(now())
 
   @@unique([eventId, userId])
+  @@index([userId])
   @@map("event_registrations")
 }
 
@@ -385,6 +409,7 @@ model Announcement {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
+  @@index([createdById])
   @@map("announcements")
 }
 

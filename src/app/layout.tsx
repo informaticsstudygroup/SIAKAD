@@ -2,14 +2,31 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-plus-jakarta-sans",
+// Satu keluarga huruf saja, dibedakan lewat bobot. Geometris, bersih, dan
+// kebetulan tipeface buatan Jakarta — pas untuk komunitas mahasiswa Indonesia.
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "ISG Mini SIAKAD",
-  description: "Platform komunitas belajar Informatics Study Group (ISG).",
+  title: {
+    default: "ISG Mini SIAKAD",
+    template: "%s — ISG Mini SIAKAD",
+  },
+  description:
+    "Platform komunitas belajar Informatics Study Group (ISG): kelas, tugas, kuis, dan sertifikat dalam satu tempat.",
+  icons: {
+    icon: "/LOGOISG.png",
+    apple: "/LOGOISG.png",
+  },
+  openGraph: {
+    title: "ISG Mini SIAKAD",
+    description:
+      "Platform komunitas belajar Informatics Study Group (ISG): kelas, tugas, kuis, dan sertifikat dalam satu tempat.",
+    type: "website",
+    images: ["/LOGOISG.png"],
+  },
 };
 
 export default function RootLayout({
@@ -18,8 +35,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className={`${plusJakartaSans.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+    <html lang="id" className={`${jakarta.variable} h-full antialiased`}>
+      <body className="flex min-h-full flex-col font-sans">{children}</body>
     </html>
   );
 }

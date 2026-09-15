@@ -1,5 +1,10 @@
 import { auth } from "@/lib/auth";
 import { ParticipantDashboard } from "@/features/dashboard/participant/components/ParticipantDashboard";
+import { loadParticipantDashboard } from "@/features/dashboard/participant/data";
+import { MonitoringOverview } from "@/features/monitoring/components/MonitoringOverview";
+import { loadMonitoringOverview } from "@/features/monitoring/data";
+import { MentorDashboard } from "@/features/dashboard/mentor/components/MentorDashboard";
+import { loadMentorDashboard } from "@/features/dashboard/mentor/data";
 
 const ROLE_LABEL: Record<string, string> = {
   ADMIN: "Admin",
@@ -13,7 +18,19 @@ export default async function DashboardPage() {
   const user = session!.user;
 
   if (user.role === "PARTICIPANT") {
-    return <ParticipantDashboard name={user.name ?? "Peserta"} />;
+    const data = await loadParticipantDashboard(user.id);
+    return <ParticipantDashboard name={user.name ?? "Peserta"} data={data} />;
+  }
+
+  // Advisor dan Admin melihat panel pemantauan seluruh komunitas.
+  if (user.role === "ADVISOR" || user.role === "ADMIN") {
+    const data = await loadMonitoringOverview();
+    return <MonitoringOverview data={data} viewerName={user.name ?? "Pengguna"} />;
+  }
+
+  if (user.role === "MENTOR" || user.role === "CO_MENTOR") {
+    const data = await loadMentorDashboard(user.id);
+    return <MentorDashboard name={user.name ?? "Mentor"} data={data} />;
   }
 
   return (

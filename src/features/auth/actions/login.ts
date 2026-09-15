@@ -41,6 +41,13 @@ export async function loginAction(
             error:
               "Email/NIM atau kata sandi salah, atau akun belum diverifikasi admin.",
           };
+        // Dilempar saat authorize() gagal di sisi server — paling sering karena
+        // database tidak bisa dihubungi. Jangan disamarkan jadi salah kata sandi.
+        case "CallbackRouteError":
+          return {
+            error:
+              "Server sedang tidak bisa menghubungi database. Ini bukan kesalahan kata sandimu — coba lagi beberapa saat lagi.",
+          };
         default:
           return { error: "Terjadi kesalahan saat masuk. Silakan coba lagi." };
       }

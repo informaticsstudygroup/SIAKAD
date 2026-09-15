@@ -5,12 +5,18 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+const connectionString = process.env.DATABASE_URL ?? "";
+
+// Postgres lokal (docker, dev) tidak melayani TLS, jadi SSL hanya dinyalakan
+// untuk host non-lokal. Sebelumnya SSL selalu aktif dan koneksi ke localhost
+// selalu ditolak.
+const isLocalDatabase = /@(localhost|127\.0\.0\.1|\[::1\])[:/]/.test(connectionString);
+
 const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL,
-  // Supabase pooler menggunakan sertifikat yang tidak selalu ada di trust
-  // store lokal/serverless — verifikasi rantai sertifikat dimatikan, koneksi
-  // tetap terenkripsi TLS.
-  ssl: { rejectUnauthorized: false },
+  connectionString,
+  // Supabase pooler memakai sertifikat yang tidak selalu ada di trust store
+  // lokal/serverless — verifikasi rantai dimatikan, koneksi tetap terenkripsi.
+  ssl: isLocalDatabase ? false : { rejectUnauthorized: false },
 });
 
 export const prisma =

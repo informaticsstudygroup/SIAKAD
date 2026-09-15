@@ -1,25 +1,116 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* Font di-inject oleh next/font di src/app/layout.tsx */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-plus-jakarta-sans);
+  --font-sans: var(--font-jakarta);
+  --font-display: var(--font-jakarta);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@theme {
+  /* Dasar & tinta — putih bersih dengan sedikit bias biru */
+  --color-isg-bg: #fbfdff;
+  --color-isg-tint: #eef6fc;
+  --color-isg-surface: #ffffff;
+  --color-isg-ink: #0f1729;
+  --color-isg-ink-soft: #475069;
+  --color-isg-muted: #7a849b;
+  --color-isg-line: #e7edf5;
+
+  /* Warna merek — diambil langsung dari LOGOISG.png */
+  --color-isg-blue: #0c81e4;
+  --color-isg-blue-deep: #0a63b0;
+  --color-isg-cyan: #11c4d4;
+  --color-isg-mint: #4fe7af;
+  --color-isg-navy: #0b1c3d;
+
+  /* Satu-satunya warna hangat, penyeimbang palet yang serba dingin */
+  --color-isg-sun: #ffc53d;
+
+  /* Warna semantik — sengaja dipisah dari warna aksen */
+  --color-isg-ok: #16a36a;
+  --color-isg-warn: #f59e0b;
+  --color-isg-bad: #e5484d;
+
+  --radius-card: 1.75rem;
+  --radius-xl2: 2.5rem;
+
+  --shadow-pop: 0 20px 44px -26px rgba(15, 23, 41, 0.28);
+  --shadow-lift: 0 22px 50px -24px rgba(12, 129, 228, 0.5);
+  --shadow-nav: 0 10px 30px -14px rgba(15, 23, 41, 0.22);
+}
+
+/* Keyframes untuk komponen di src/components/reactbits */
+@keyframes blur-in {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
   }
 }
 
+/* Dipakai PillNav saat initialLoadAnimation aktif. */
+@keyframes pill-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Dipakai Stepper: arah geser diatur lewat --step-from (positif = maju). */
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translateX(var(--step-from, 32px));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes shine {
+  from {
+    background-position: 260% 0;
+  }
+  to {
+    background-position: -60% 0;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-isg-bg);
+  color: var(--color-isg-ink);
+}
+
+/* Cincin fokus seragam untuk keyboard di seluruh aplikasi */
+:focus-visible {
+  outline: 2px solid var(--color-isg-blue);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

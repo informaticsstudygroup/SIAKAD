@@ -24,6 +24,9 @@ async function findUserByIdentifier(identifier: string) {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  // Tanpa ini Auth.js menolak request di build produksi ("UntrustedHost") kecuali
+  // dideploy di Vercel — login jadi 500 di `next start`, VPS, atau Docker.
+  trustHost: true,
   session: { strategy: "jwt" },
   pages: {
     signIn: "/login",
@@ -38,7 +41,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const parsed = credentialsSchema.safeParse(rawCredentials);
         if (!parsed.success) return null;
 
-        const user = await findUserByIdentifier(parsed.data.identifier);
+        // Kegagalan database dibedakan dari "user tidak ditemukan": yang pertama
+        // harus dilempar supaya pengguna diberi tahu servernya bermasalah, bukan
+        // disamarkan jadi "kata sandi salah".
+        let user;
+        try {
+          user = await findUserByIdentifier(parsed.data.identifier);
+        } catch (error) {
+          console.error("[auth] gagal membaca user dari database:", error);
+          throw new Error("DATABASE_UNAVAILABLE");
+        }
+
         if (!user) return null;
 
         const passwordMatches = await bcrypt.compare(
@@ -56,6 +69,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: user.email,
           role: user.role,
           status: user.status,
+          mustChangePassword: user.mustChangePassword,
         };
       },
     }),
