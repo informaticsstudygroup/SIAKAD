@@ -44,7 +44,7 @@ export default function RegisterPage() {
             Daftar jadi peserta Informatics Study Group
           </h1>
           <p className="mt-2 text-base text-isg-ink-soft">
-            Tiga langkah singkat. Akunmu aktif setelah diverifikasi Admin.
+            Dua langkah singkat. Akunmu aktif setelah diverifikasi Admin.
           </p>
         </div>
 

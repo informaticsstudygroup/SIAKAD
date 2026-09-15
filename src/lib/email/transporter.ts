@@ -26,10 +26,33 @@ export type SendEmailResult = {
  * variabel SMTP_*. Tidak ada yang cocok, sehingga setiap pengiriman diam-diam
  * jatuh ke mode mock dan tetap melaporkan "berhasil".
  */
+/**
+ * Mengubah nilai yang hanya berisi nama menjadi alamat yang sah.
+ *
+ *   "Informatics Study Group"  ->  "Informatics Study Group <isg@gmail.com>"
+ *
+ * Nilai tanpa tanda "@" bukan alamat email, melainkan nama tampilan. Ini
+ * pernah melumpuhkan pengiriman di produksi: EMAIL_FROM di server terisi
+ * "Informatics Study Group" tanpa bagian <alamat>, dan Resend menolaknya
+ * dengan HTTP 422 "Invalid `from` field". Daripada menolak, nama itu
+ * dipasangkan saja dengan alamat pengirim yang sudah diketahui.
+ */
+function normalizeFrom(raw: string | undefined, fallbackAddress: string | undefined) {
+  const value = raw?.trim();
+  if (!value) return fallbackAddress;
+  if (value.includes("@")) return value;
+  return fallbackAddress ? `${value} <${fallbackAddress}>` : undefined;
+}
+
 function resendConfig() {
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.RESEND_FROM_EMAIL ?? process.env.EMAIL_FROM;
-  return apiKey && from ? { apiKey, from } : null;
+  const from = normalizeFrom(
+    process.env.RESEND_FROM_EMAIL ?? process.env.EMAIL_FROM,
+    process.env.RESEND_FROM_ADDRESS ?? process.env.SMTP_USER,
+  );
+  // Tanpa "@" alamatnya tetap tidak sah; anggap belum terkonfigurasi supaya
+  // kegagalannya muncul sebagai pesan yang jelas, bukan error 422 dari API.
+  return apiKey && from?.includes("@") ? { apiKey, from } : null;
 }
 
 function smtpConfig() {
@@ -46,7 +69,7 @@ function smtpConfig() {
     secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : port === 465,
     user,
     pass,
-    from: process.env.EMAIL_FROM ?? user,
+    from: normalizeFrom(process.env.EMAIL_FROM, user) ?? user,
   };
 }
 
@@ -165,7 +188,19 @@ export async function sendEmail({
     });
     return { success: true, provider: "smtp" };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Gagal mengirim email";
+    let message = error instanceof Error ? error.message : "Gagal mengirim email";
+
+    // Railway (dan banyak penyedia hosting lain) menutup port SMTP keluar untuk
+    // mencegah penyalahgunaan, jadi koneksinya menggantung sampai timeout.
+    // Kredensial yang benar pun tidak menolong; satu-satunya jalan keluar
+    // adalah penyedia berbasis HTTPS seperti Resend.
+    if (provider === "smtp" && /timeout|ETIMEDOUT|ECONNREFUSED|EHOSTUNREACH/i.test(message)) {
+      message =
+        "Koneksi SMTP keluar diblokir oleh server hosting, jadi email tidak bisa " +
+        "dikirim lewat SMTP dari sini. Pakai Resend: isi RESEND_API_KEY dan " +
+        "RESEND_FROM_EMAIL, lalu setel EMAIL_PROVIDER=resend.";
+    }
+
     console.error(`[EMAIL] pengiriman lewat ${provider} gagal:`, message);
     return { success: false, provider, error: message };
   }

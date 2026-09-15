@@ -102,7 +102,7 @@ perlu login.
 
 ### Peserta — daftar sendiri di `/register`
 
-Tiga langkah. Setelah submit, akun berstatus `PENDING` dan Admin
+Dua langkah. Setelah submit, akun berstatus `PENDING` dan Admin
 memverifikasinya di `/dashboard/pendaftar`.
 
 | Field | Aturan |

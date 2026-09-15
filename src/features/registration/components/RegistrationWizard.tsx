@@ -172,7 +172,7 @@ export function RegistrationWizard() {
                 hint={
                   REQUIRE_CAMPUS_EMAIL
                     ? `Wajib berakhiran ${CAMPUS_EMAIL_DOMAIN}`
-                    : "Pakai email yang paling sering kamu buka — ke sini kami kirim aktivasi akun."
+                    : "Pakai email yang paling sering kamu buka. Pemberitahuan aktivasi dikirim ke sini."
                 }
               >
                 <input
@@ -391,10 +391,15 @@ function Field({
 function Row({ label, value, full }: { label: string; value: string; full?: boolean }) {
   return (
     <div className={cn("flex min-w-0 flex-col gap-0.5", full && "sm:col-span-2")}>
-      <dt className="text-xs font-semibold uppercase tracking-wide text-isg-muted">
-        {label}
-      </dt>
-      <dd className="wrap-break-word text-sm font-semibold text-isg-ink">{value || "—"}</dd>
+      <dt className="text-xs text-isg-muted">{label}</dt>
+      <dd
+        className={cn(
+          "wrap-break-word text-sm font-semibold",
+          value ? "text-isg-ink" : "font-normal text-isg-muted",
+        )}
+      >
+        {value || "Belum diisi"}
+      </dd>
     </div>
   );
 }
