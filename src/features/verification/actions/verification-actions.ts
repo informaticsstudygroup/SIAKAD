@@ -78,16 +78,18 @@ export async function verifyApplicant(
 
   if (!participant) return { error: "Peserta tidak ditemukan." };
 
-  const generatedPassword = `ISG-${crypto.randomBytes(5).toString("base64url")}`;
-  const newPasswordHash = await bcrypt.hash(generatedPassword, 10);
-
+  // Kata sandi peserta TIDAK ditimpa lagi. Sebelumnya verifikasi membuat kata
+  // sandi baru lalu mengirimkannya sebagai teks terang di email — itu memicu
+  // filter phishing Gmail sehingga emailnya masuk Spam, sekaligus menyimpan
+  // kredensial di kotak surat penerima selamanya.
+  // Peserta memakai kata sandi yang dia buat sendiri saat mendaftar, dan
+  // mustChangePassword yang sudah diset saat pendaftaran tetap memaksa
+  // penggantian pada login pertama.
   await prisma.$transaction([
     prisma.user.update({
       where: { id: participant.userId },
       data: {
         status: "VERIFIED",
-        passwordHash: newPasswordHash,
-        mustChangePassword: true,
       },
     }),
     prisma.participantProfile.update({
@@ -111,7 +113,6 @@ export async function verifyApplicant(
     studentId: participant.studentId,
     email: participant.user.email,
     batchName: batch?.name ?? "Angkatan ISG",
-    passwordText: generatedPassword,
     loginUrl: `${baseUrl}/login`,
     note: parsed.data.note || null,
   });

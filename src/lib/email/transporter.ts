@@ -5,6 +5,8 @@ export type SendEmailOptions = {
   to: string;
   subject: string;
   text: string;
+  /** Alamat balasan. Menaikkan legitimasi email di mata penyedia surat. */
+  replyTo?: string;
 };
 
 export type SendEmailResult = {
@@ -102,6 +104,7 @@ export async function sendEmail({
   to,
   subject,
   text,
+  replyTo = process.env.EMAIL_REPLY_TO ?? process.env.SMTP_USER,
 }: SendEmailOptions): Promise<SendEmailResult> {
   const provider = getEmailProvider();
 
@@ -132,13 +135,20 @@ export async function sendEmail({
         to,
         subject,
         text,
+        ...(replyTo ? { replyTo } : {}),
       });
       if (error) throw new Error(error.message);
       return { success: true, provider: "resend" };
     }
 
     const cfg = smtpConfig()!;
-    await getSmtpTransport(cfg).sendMail({ from: cfg.from, to, subject, text });
+    await getSmtpTransport(cfg).sendMail({
+      from: cfg.from,
+      to,
+      subject,
+      text,
+      ...(replyTo ? { replyTo } : {}),
+    });
     return { success: true, provider: "smtp" };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Gagal mengirim email";

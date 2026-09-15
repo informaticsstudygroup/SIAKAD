@@ -23,33 +23,30 @@ export type RejectionEmailData = {
  * Template email plain text untuk peserta yang pendaftarannya disetujui.
  */
 export function buildVerificationSuccessEmail(data: VerificationEmailData) {
-  const subject = "Akun SIAKAD ISG Anda telah aktif";
-  const passwordDisplay = data.passwordText
-    ? data.passwordText
-    : "Sesuai kata sandi yang Anda buat saat pendaftaran";
+  const subject = `Selamat, pendaftaran ISG kamu diterima — ${data.batchName}`;
 
+  // Tidak ada kata sandi di dalam email ini. Mengirim kredensial berikut
+  // tautan masuk adalah pola yang dikenali Gmail sebagai phishing, dan itu
+  // yang membuat email sebelumnya mendarat di Spam.
   const text = `Halo ${data.name},
 
-Pendaftaran Anda di Informatics Study Group telah diverifikasi dan disetujui untuk ${data.batchName}. Akun SIAKAD ISG Anda saat ini sudah aktif.
+Kabar baik. Pendaftaranmu di Informatics Study Group sudah ditinjau dan diterima, dan kamu ditempatkan di ${data.batchName}.
 
-Kredensial Akun:
-NIM / Identitas Login : ${data.studentId}
-Email Terdaftar       : ${data.email}
-Kata Sandi            : ${passwordDisplay}
-Angkatan Belajar      : ${data.batchName}
-
-${data.note ? `Catatan Admin:
+Rincian keanggotaanmu:
+NIM       : ${data.studentId}
+Email     : ${data.email}
+Angkatan  : ${data.batchName}
+${data.note ? `
+Catatan dari Admin:
 ${data.note}
+` : ""}
+Kamu sudah bisa masuk ke portal ISG di ${data.loginUrl} memakai NIM dan kata sandi yang kamu buat sendiri saat mendaftar. Kami tidak pernah mengirimkan kata sandi lewat email.
 
-` : ""}Silakan masuk melalui portal SIAKAD ISG:
-${data.loginUrl}
+Kalau lupa kata sandi, balas email ini dan Admin akan membantu.
 
-Gunakan NIM atau email di atas beserta kata sandi Anda untuk masuk ke sistem.
-
+Sampai jumpa di kelas,
 Informatics Study Group
-Universitas Katolik De La Salle Manado
-
-Pesan otomatis dari portal SIAKAD ISG.`;
+Universitas Katolik De La Salle Manado`;
 
   return { subject, text };
 }
