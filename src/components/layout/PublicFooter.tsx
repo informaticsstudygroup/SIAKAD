@@ -27,21 +27,29 @@ export function PublicFooter() {
       <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-14 sm:px-6 lg:flex-row lg:justify-between lg:px-8">
         <div className="flex max-w-sm flex-col gap-3">
           <div className="flex items-center gap-2.5">
-            <Image src="/LOGOISG.png" alt="" width={30} height={30} aria-hidden />
+            <Image
+              src="/LOGOISG.png"
+              alt=""
+              width={30}
+              height={30}
+              aria-hidden
+            />
             <span className="text-[15px] font-extrabold tracking-tight text-isg-ink">
               Informatics Study Group SIAKAD
             </span>
           </div>
           <p className="text-sm text-isg-muted">
-            Informatics Study Group — komunitas belajar teknologi bagi mahasiswa yang ingin
-            berkembang lewat kelas, proyek, dan kolaborasi.
+            Informatics Study Group — komunitas belajar teknologi bagi mahasiswa
+            yang ingin berkembang lewat kelas, proyek, dan kolaborasi.
           </p>
         </div>
 
         <div className="flex flex-wrap gap-10 sm:gap-16">
           {LINK_GROUPS.map((group) => (
             <div key={group.title} className="flex flex-col gap-2.5">
-              <span className="text-sm font-extrabold text-isg-ink">{group.title}</span>
+              <span className="text-sm font-extrabold text-isg-ink">
+                {group.title}
+              </span>
               {group.links.map((link) => (
                 <Link
                   key={link.href}
@@ -75,8 +83,8 @@ export function PublicFooter() {
       </div>
 
       <div className="border-t border-isg-line px-4 py-5 text-center text-xs text-isg-muted sm:px-6 lg:px-8">
-        &copy; {new Date().getFullYear()} Informatics Study Group. Seluruh hak cipta
-        dilindungi.
+        &copy; {new Date().getFullYear()} Informatics Study Group. Seluruh hak
+        cipta dilindungi.
       </div>
     </footer>
   );

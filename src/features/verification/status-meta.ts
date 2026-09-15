@@ -26,13 +26,15 @@ export const ACCOUNT_STATUS_META: Record<
   },
   REVISION_REQUIRED: {
     title: "Perlu Revisi Data",
-    description: "Admin meminta kamu melengkapi atau memperbaiki sebagian data pendaftaran.",
+    description:
+      "Admin meminta kamu melengkapi atau memperbaiki sebagian data pendaftaran.",
     color: "text-[#0C81E4]",
     bg: "bg-[#0C81E4]/10",
   },
   DISABLED: {
     title: "Akun Dinonaktifkan",
-    description: "Akun ini telah dinonaktifkan. Hubungi Admin untuk informasi lebih lanjut.",
+    description:
+      "Akun ini telah dinonaktifkan. Hubungi Admin untuk informasi lebih lanjut.",
     color: "text-[#64748B]",
     bg: "bg-[#64748B]/10",
   },

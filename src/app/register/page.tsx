@@ -29,7 +29,13 @@ export default function RegisterPage() {
           </Link>
 
           <Link href="/" aria-label="Beranda Informatics Study Group SIAKAD">
-            <Image src="/LOGOISG.png" alt="" width={34} height={34} aria-hidden />
+            <Image
+              src="/LOGOISG.png"
+              alt=""
+              width={34}
+              height={34}
+              aria-hidden
+            />
           </Link>
         </div>
 

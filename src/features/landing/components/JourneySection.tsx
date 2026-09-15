@@ -5,32 +5,39 @@ const STEPS = [
   {
     number: "01",
     title: "Daftar & Verifikasi",
-    description: "Isi formulir singkat, lalu Admin memverifikasi dan menempatkanmu di angkatan.",
+    description:
+      "Isi formulir singkat, lalu Admin memverifikasi dan menempatkanmu di angkatan.",
     dot: "bg-isg-blue",
   },
   {
     number: "02",
     title: "Ikuti Pertemuan",
-    description: "Hadir di kelas, workshop, dan sharing session sesuai jadwal angkatanmu.",
+    description:
+      "Hadir di kelas, workshop, dan sharing session sesuai jadwal angkatanmu.",
     dot: "bg-isg-cyan",
   },
   {
     number: "03",
     title: "Kerjakan Tugas & Proyek",
-    description: "Asah kemampuan lewat tugas, kuis berkala, dan proyek bersama tim.",
+    description:
+      "Asah kemampuan lewat tugas, kuis berkala, dan proyek bersama tim.",
     dot: "bg-isg-mint",
   },
   {
     number: "04",
     title: "Dapat Sertifikat",
-    description: "Penuhi syarat kehadiran dan tugas, lalu unduh e-certificate-mu.",
+    description:
+      "Penuhi syarat kehadiran dan tugas, lalu unduh e-certificate-mu.",
     dot: "bg-isg-sun",
   },
 ];
 
 export function JourneySection() {
   return (
-    <section id="alur" className="scroll-mt-28 px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
+    <section
+      id="alur"
+      className="scroll-mt-28 px-4 py-14 sm:px-6 lg:px-8 lg:py-20"
+    >
       <div className="mx-auto max-w-6xl">
         <div className="relative mb-10 flex flex-col items-center gap-3 text-center">
           <span className="text-xs font-bold uppercase tracking-[0.16em] text-isg-blue">
@@ -40,8 +47,9 @@ export function JourneySection() {
             Empat langkah dari daftar sampai sertifikat
           </h2>
           <p className="max-w-xl text-base text-isg-ink-soft">
-            Kamu tidak melompat sendirian. Tiap tahap ada mentor, teman seangkatan, dan
-            catatan progres yang bisa kamu pantau di Informatics Study Group SIAKAD.
+            Kamu tidak melompat sendirian. Tiap tahap ada mentor, teman
+            seangkatan, dan catatan progres yang bisa kamu pantau di Informatics
+            Study Group SIAKAD.
           </p>
         </div>
 
@@ -61,7 +69,10 @@ export function JourneySection() {
           {STEPS.map((step) => (
             <li key={step.number} className="flex flex-col gap-2">
               <div className="flex items-center gap-2.5">
-                <span aria-hidden className={`h-2.5 w-2.5 rounded-full ${step.dot}`} />
+                <span
+                  aria-hidden
+                  className={`h-2.5 w-2.5 rounded-full ${step.dot}`}
+                />
                 <span className="text-xs font-bold tracking-[0.14em] text-isg-muted">
                   {step.number}
                 </span>

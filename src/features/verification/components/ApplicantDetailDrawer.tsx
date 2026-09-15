@@ -22,10 +22,13 @@ export function ApplicantDetailDrawer({
   applicant,
   batches,
   onClose,
+  onDone,
 }: {
   applicant: ApplicantWithRelations;
   batches: BatchOption[];
   onClose: () => void;
+  /** Dipanggil setelah aksi berhasil: drawer ditutup dan toast ditampilkan. */
+  onDone: (msg: { tone: "success" | "error"; title: string; description?: string }) => void;
 }) {
   const [activeAction, setActiveAction] = useState<ActiveAction>(null);
   const canAct = applicant.user.status === "PENDING" || applicant.user.status === "REVISION_REQUIRED";
@@ -151,12 +154,19 @@ export function ApplicantDetailDrawer({
             ) : null}
 
             {activeAction === "verify" ? (
-              <VerifyForm applicant={applicant} batches={batches} onCancel={() => setActiveAction(null)} />
+              <VerifyForm
+                applicant={applicant}
+                batches={batches}
+                onCancel={() => setActiveAction(null)}
+                onDone={onDone}
+              />
             ) : null}
             {activeAction === "reject" ? (
               <NoteActionForm
                 applicant={applicant}
                 action={rejectApplicant}
+                onDone={onDone}
+                doneTitle="Pendaftar ditolak"
                 label="Tolak Pendaftar"
                 placeholder="Jelaskan alasan penolakan..."
                 isDanger
@@ -167,6 +177,8 @@ export function ApplicantDetailDrawer({
               <NoteActionForm
                 applicant={applicant}
                 action={requestRevision}
+                onDone={onDone}
+                doneTitle="Permintaan revisi dikirim"
                 label="Kirim Permintaan Revisi"
                 placeholder="Jelaskan data apa yang perlu diperbaiki..."
                 onCancel={() => setActiveAction(null)}
@@ -192,15 +204,22 @@ function VerifyForm({
   applicant,
   batches,
   onCancel,
+  onDone,
 }: {
   applicant: ApplicantWithRelations;
   batches: BatchOption[];
   onCancel: () => void;
+  onDone: (msg: { tone: "success" | "error"; title: string; description?: string }) => void;
 }) {
   const [state, formAction, isPending] = useActionState(verifyApplicant, initialState);
 
   useEffect(() => {
-    if (state.success) onCancel();
+    if (state.success)
+      onDone({
+        tone: "success",
+        title: "Peserta berhasil diverifikasi",
+        description: `Email berisi rincian akun sudah dikirim ke ${applicant.user.email}.`,
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.success]);
 
@@ -270,6 +289,8 @@ function NoteActionForm({
   placeholder,
   isDanger,
   onCancel,
+  onDone,
+  doneTitle,
 }: {
   applicant: ApplicantWithRelations;
   action: (prevState: VerificationFormState, formData: FormData) => Promise<VerificationFormState>;
@@ -277,11 +298,18 @@ function NoteActionForm({
   placeholder: string;
   isDanger?: boolean;
   onCancel: () => void;
+  onDone: (msg: { tone: "success" | "error"; title: string; description?: string }) => void;
+  doneTitle: string;
 }) {
   const [state, formAction, isPending] = useActionState(action, initialState);
 
   useEffect(() => {
-    if (state.success) onCancel();
+    if (state.success)
+      onDone({
+        tone: "success",
+        title: doneTitle,
+        description: `Pemberitahuan sudah dikirim ke ${applicant.user.email}.`,
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.success]);
 

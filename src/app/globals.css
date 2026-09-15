@@ -53,6 +53,18 @@
   }
 }
 
+/* Dipakai komponen Toast. */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 /* Dipakai PillNav saat initialLoadAnimation aktif. */
 @keyframes pill-in {
   from {

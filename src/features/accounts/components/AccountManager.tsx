@@ -76,7 +76,8 @@ export function AccountManager({
             Manajemen Akun
           </h1>
           <p className="text-sm text-isg-muted">
-            {accounts.length} akun ditampilkan. Akun peserta dibuat lewat pendaftaran.
+            {accounts.length} akun ditampilkan. Akun peserta dibuat lewat
+            pendaftaran.
           </p>
         </div>
 
@@ -299,7 +300,9 @@ export function AccountManager({
       {toggling ? (
         <ConfirmDialog
           title={
-            toggling.status === "DISABLED" ? "Aktifkan akun?" : "Nonaktifkan akun?"
+            toggling.status === "DISABLED"
+              ? "Aktifkan akun?"
+              : "Nonaktifkan akun?"
           }
           description={
             toggling.status === "DISABLED"

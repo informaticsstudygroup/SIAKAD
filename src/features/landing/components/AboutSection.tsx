@@ -21,7 +21,10 @@ const POINTS = [
 
 export function AboutSection() {
   return (
-    <section id="tentang" className="scroll-mt-28 px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+    <section
+      id="tentang"
+      className="scroll-mt-28 px-4 py-16 sm:px-6 lg:px-8 lg:py-24"
+    >
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20">
         <div className="lg:sticky lg:top-28 lg:self-start">
           <span className="text-xs font-bold uppercase tracking-[0.16em] text-isg-blue">
@@ -31,9 +34,9 @@ export function AboutSection() {
             Komunitas belajar, bukan kelas tambahan.
           </h2>
           <p className="mt-5 text-base text-isg-ink-soft">
-            Informatics Study Group dibentuk mahasiswa Informatika yang ingin belajar
-            teknologi di luar kelas formal. Yang membedakannya dari sekadar grup belajar
-            adalah empat hal berikut.
+            Informatics Study Group dibentuk mahasiswa Informatika yang ingin
+            belajar teknologi di luar kelas formal. Yang membedakannya dari
+            sekadar grup belajar adalah empat hal berikut.
           </p>
         </div>
 
@@ -50,7 +53,9 @@ export function AboutSection() {
                 <h3 className="text-lg font-extrabold tracking-tight text-isg-ink">
                   {point.title}
                 </h3>
-                <p className="mt-1.5 text-base text-isg-ink-soft">{point.body}</p>
+                <p className="mt-1.5 text-base text-isg-ink-soft">
+                  {point.body}
+                </p>
               </div>
             </li>
           ))}

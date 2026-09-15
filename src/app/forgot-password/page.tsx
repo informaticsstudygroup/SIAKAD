@@ -28,7 +28,13 @@ export default function ForgotPasswordPage() {
 
         <div className="rounded-card border border-isg-line bg-isg-surface p-7 shadow-pop sm:p-8">
           <Link href="/" className="mb-6 flex w-fit items-center gap-2">
-            <Image src="/LOGOISG.png" alt="" width={30} height={30} aria-hidden />
+            <Image
+              src="/LOGOISG.png"
+              alt=""
+              width={30}
+              height={30}
+              aria-hidden
+            />
             <span className="font-display text-sm font-extrabold text-isg-ink">
               Informatics Study Group SIAKAD
             </span>
@@ -38,8 +44,8 @@ export default function ForgotPasswordPage() {
             Lupa kata sandi?
           </h1>
           <p className="mt-2 text-sm text-isg-ink-soft">
-            Pemulihan kata sandi di ISG masih dibantu langsung oleh Admin, jadi belum ada
-            email otomatis. Ikuti tiga langkah berikut.
+            Pemulihan kata sandi di ISG masih dibantu langsung oleh Admin, jadi
+            belum ada email otomatis. Ikuti tiga langkah berikut.
           </p>
 
           <ol className="mt-6 flex flex-col gap-4">
@@ -66,7 +72,10 @@ export default function ForgotPasswordPage() {
 
           <p className="mt-5 text-center text-sm text-isg-muted">
             Sudah ingat kata sandimu?{" "}
-            <Link href="/login" className="font-bold text-isg-blue hover:underline">
+            <Link
+              href="/login"
+              className="font-bold text-isg-blue hover:underline"
+            >
               Masuk
             </Link>
           </p>

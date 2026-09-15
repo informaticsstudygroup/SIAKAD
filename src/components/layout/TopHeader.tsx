@@ -12,7 +12,9 @@ const ROLE_LABEL: Record<string, string> = {
 export function TopHeader({ name, role }: { name: string; role: string }) {
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-[#E2E8F0] bg-white px-6">
-      <span className="text-sm font-semibold text-[#102033] lg:hidden">Informatics Study Group</span>
+      <span className="text-sm font-semibold text-[#102033] lg:hidden">
+        Informatics Study Group
+      </span>
       <div className="hidden lg:block" />
 
       <div className="flex items-center gap-3">

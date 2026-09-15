@@ -15,9 +15,30 @@ import {
 
 export type VerificationFormState = { error?: string; success?: boolean };
 
+/**
+ * Alamat dasar untuk tautan di dalam email.
+ *
+ * Railway dan Vercel menyediakan domain publiknya sendiri lewat variabel
+ * lingkungan, jadi keduanya dipakai sebagai cadangan. Tanpa itu, lupa mengisi
+ * NEXT_PUBLIC_APP_URL di server membuat peserta menerima tautan
+ * http://localhost:3000 yang mustahil dibuka dari perangkat mereka.
+ */
 function getAppBaseUrl(): string {
-  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
-  if (process.env.NEXTAUTH_URL) return process.env.NEXTAUTH_URL.replace(/\/$/, "");
+  const strip = (url: string) => url.replace(/\/$/, "");
+
+  if (process.env.NEXT_PUBLIC_APP_URL) return strip(process.env.NEXT_PUBLIC_APP_URL);
+  if (process.env.AUTH_URL) return strip(process.env.AUTH_URL);
+  if (process.env.NEXTAUTH_URL) return strip(process.env.NEXTAUTH_URL);
+  if (process.env.RAILWAY_PUBLIC_DOMAIN)
+    return `https://${strip(process.env.RAILWAY_PUBLIC_DOMAIN)}`;
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL)
+    return `https://${strip(process.env.VERCEL_PROJECT_PRODUCTION_URL)}`;
+
+  if (process.env.NODE_ENV === "production") {
+    console.error(
+      "[email] Alamat situs belum diset. Isi NEXT_PUBLIC_APP_URL di server, kalau tidak tautan login di email akan menunjuk ke localhost.",
+    );
+  }
   return "http://localhost:3000";
 }
 
@@ -41,7 +62,8 @@ export async function verifyApplicant(
   if (!session) return { error: "Kamu tidak memiliki akses untuk aksi ini." };
 
   const parsed = verifySchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Data tidak valid." };
+  if (!parsed.success)
+    return { error: parsed.error.issues[0]?.message ?? "Data tidak valid." };
 
   const [participant, batch] = await Promise.all([
     prisma.participantProfile.findUnique({
@@ -122,7 +144,8 @@ export async function rejectApplicant(
   if (!session) return { error: "Kamu tidak memiliki akses untuk aksi ini." };
 
   const parsed = noteSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Catatan wajib diisi." };
+  if (!parsed.success)
+    return { error: parsed.error.issues[0]?.message ?? "Catatan wajib diisi." };
 
   const participant = await prisma.participantProfile.findUnique({
     where: { id: parsed.data.participantId },
@@ -131,7 +154,10 @@ export async function rejectApplicant(
   if (!participant) return { error: "Peserta tidak ditemukan." };
 
   await prisma.$transaction([
-    prisma.user.update({ where: { id: participant.userId }, data: { status: "REJECTED" } }),
+    prisma.user.update({
+      where: { id: participant.userId },
+      data: { status: "REJECTED" },
+    }),
     prisma.verificationLog.create({
       data: {
         participantId: participant.id,
@@ -166,7 +192,8 @@ export async function requestRevision(
   if (!session) return { error: "Kamu tidak memiliki akses untuk aksi ini." };
 
   const parsed = noteSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Catatan wajib diisi." };
+  if (!parsed.success)
+    return { error: parsed.error.issues[0]?.message ?? "Catatan wajib diisi." };
 
   const participant = await prisma.participantProfile.findUnique({
     where: { id: parsed.data.participantId },
@@ -175,7 +202,10 @@ export async function requestRevision(
   if (!participant) return { error: "Peserta tidak ditemukan." };
 
   await prisma.$transaction([
-    prisma.user.update({ where: { id: participant.userId }, data: { status: "REVISION_REQUIRED" } }),
+    prisma.user.update({
+      where: { id: participant.userId },
+      data: { status: "REVISION_REQUIRED" },
+    }),
     prisma.verificationLog.create({
       data: {
         participantId: participant.id,
