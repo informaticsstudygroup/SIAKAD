@@ -41,7 +41,7 @@ export function JourneySection() {
           </h2>
           <p className="max-w-xl text-base text-isg-ink-soft">
             Kamu tidak melompat sendirian. Tiap tahap ada mentor, teman seangkatan, dan
-            catatan progres yang bisa kamu pantau di Mini SIAKAD.
+            catatan progres yang bisa kamu pantau di Informatics Study Group SIAKAD.
           </p>
         </div>
 

@@ -7,7 +7,7 @@ const POINTS = [
   },
   {
     title: "Semua pertemuan terekam",
-    body: "Materi dan catatan tiap sesi tersimpan di Mini SIAKAD, jadi ketinggalan satu pertemuan bukan berarti tertinggal selamanya.",
+    body: "Materi dan catatan tiap sesi tersimpan di Informatics Study Group SIAKAD, jadi ketinggalan satu pertemuan bukan berarti tertinggal selamanya.",
   },
   {
     title: "Progresmu terlihat angkanya",

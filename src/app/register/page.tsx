@@ -28,14 +28,14 @@ export default function RegisterPage() {
             Kembali
           </Link>
 
-          <Link href="/" aria-label="Beranda ISG Mini SIAKAD">
+          <Link href="/" aria-label="Beranda Informatics Study Group SIAKAD">
             <Image src="/LOGOISG.png" alt="" width={34} height={34} aria-hidden />
           </Link>
         </div>
 
         <div className="mb-6">
           <h1 className="text-2xl font-extrabold tracking-tight text-isg-ink sm:text-3xl">
-            Daftar jadi peserta ISG
+            Daftar jadi peserta Informatics Study Group
           </h1>
           <p className="mt-2 text-base text-isg-ink-soft">
             Tiga langkah singkat. Akunmu aktif setelah diverifikasi Admin.

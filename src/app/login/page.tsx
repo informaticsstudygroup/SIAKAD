@@ -7,7 +7,7 @@ import { LoginForm } from "@/features/auth/components/LoginForm";
 export const metadata: Metadata = {
   title: "Masuk",
   description:
-    "Masuk ke ISG Mini SIAKAD untuk melihat jadwal, tugas, kuis, dan progres belajarmu.",
+    "Masuk ke Informatics Study Group SIAKAD untuk melihat jadwal, tugas, kuis, dan progres belajarmu.",
 };
 
 export default function LoginPage() {
@@ -38,7 +38,9 @@ export default function LoginPage() {
       <div className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 py-8 lg:px-10">
         <Link href="/" className="flex w-fit items-center gap-3 rounded-full">
           <Image src="/LOGOISG.png" alt="" width={500} height={500} aria-hidden className="h-10 w-10" />
-          <span className="text-base font-extrabold tracking-tight text-isg-ink">ISG</span>
+          <span className="text-base font-extrabold tracking-tight text-isg-ink">
+            Informatics Study Group
+          </span>
         </Link>
 
         <div className="grid flex-1 grid-cols-1 items-center gap-12 py-10 lg:grid-cols-2 lg:gap-16">

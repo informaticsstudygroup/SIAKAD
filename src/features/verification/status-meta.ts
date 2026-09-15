@@ -13,7 +13,8 @@ export const ACCOUNT_STATUS_META: Record<
   },
   VERIFIED: {
     title: "Terverifikasi",
-    description: "Selamat! Akunmu sudah aktif sebagai peserta ISG. Kamu sudah bisa masuk ke Mini SIAKAD.",
+    description:
+      "Selamat! Akunmu sudah aktif sebagai peserta Informatics Study Group. Kamu sudah bisa masuk ke Informatics Study Group SIAKAD.",
     color: "text-[#16A36A]",
     bg: "bg-[#16A36A]/10",
   },

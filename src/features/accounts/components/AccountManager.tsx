@@ -303,7 +303,7 @@ export function AccountManager({
           }
           description={
             toggling.status === "DISABLED"
-              ? `${toggling.name} akan bisa masuk kembali ke Mini SIAKAD.`
+              ? `${toggling.name} akan bisa masuk kembali ke Informatics Study Group SIAKAD.`
               : `${toggling.name} tidak akan bisa masuk lagi sampai diaktifkan kembali.`
           }
           confirmLabel={

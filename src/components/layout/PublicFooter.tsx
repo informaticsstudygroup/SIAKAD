@@ -29,7 +29,7 @@ export function PublicFooter() {
           <div className="flex items-center gap-2.5">
             <Image src="/LOGOISG.png" alt="" width={30} height={30} aria-hidden />
             <span className="text-[15px] font-extrabold tracking-tight text-isg-ink">
-              ISG Mini SIAKAD
+              Informatics Study Group SIAKAD
             </span>
           </div>
           <p className="text-sm text-isg-muted">

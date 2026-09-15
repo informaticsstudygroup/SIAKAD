@@ -11,8 +11,8 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "ISG Mini SIAKAD",
-    template: "%s — ISG Mini SIAKAD",
+    default: "Informatics Study Group SIAKAD",
+    template: "%s — Informatics Study Group SIAKAD",
   },
   description:
     "Platform komunitas belajar Informatics Study Group (ISG): kelas, tugas, kuis, dan sertifikat dalam satu tempat.",
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     apple: "/LOGOISG.png",
   },
   openGraph: {
-    title: "ISG Mini SIAKAD",
+    title: "Informatics Study Group SIAKAD",
     description:
       "Platform komunitas belajar Informatics Study Group (ISG): kelas, tugas, kuis, dan sertifikat dalam satu tempat.",
     type: "website",

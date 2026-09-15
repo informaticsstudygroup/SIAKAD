@@ -20,7 +20,7 @@ export function PublicHeader() {
     <header className="sticky top-0 z-40 px-4 pt-4 sm:px-6 lg:px-8">
       <PillNav
         logo="/LOGOISG.png"
-        logoAlt="Beranda ISG Mini SIAKAD"
+        logoAlt="Beranda Informatics Study Group SIAKAD"
         wordmark="/isText.png"
         wordmarkAlt="Informatics Study Group"
         items={NAV_ITEMS}

@@ -5,7 +5,7 @@ import { ArrowLeft, Mail } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Lupa Kata Sandi",
-  description: "Cara memulihkan akses akun ISG Mini SIAKAD.",
+  description: "Cara memulihkan akses akun Informatics Study Group SIAKAD.",
 };
 
 const STEPS = [
@@ -30,7 +30,7 @@ export default function ForgotPasswordPage() {
           <Link href="/" className="mb-6 flex w-fit items-center gap-2">
             <Image src="/LOGOISG.png" alt="" width={30} height={30} aria-hidden />
             <span className="font-display text-sm font-extrabold text-isg-ink">
-              ISG Mini SIAKAD
+              Informatics Study Group SIAKAD
             </span>
           </Link>
 
@@ -61,7 +61,7 @@ export default function ForgotPasswordPage() {
             className="mt-7 flex h-12 items-center justify-center gap-2 rounded-2xl bg-isg-blue text-sm font-extrabold text-white shadow-lift transition-colors hover:bg-isg-blue-deep"
           >
             <Mail size={17} aria-hidden />
-            Email Admin ISG
+            Email Admin Informatics Study Group
           </a>
 
           <p className="mt-5 text-center text-sm text-isg-muted">
