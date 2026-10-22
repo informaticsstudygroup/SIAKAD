@@ -1,3 +1,4 @@
+import type { Role } from "@prisma/client";
 import { Bell } from "lucide-react";
 import { AvatarMenu } from "@/components/layout/AvatarMenu";
 
@@ -9,7 +10,7 @@ const ROLE_LABEL: Record<string, string> = {
   ADVISOR: "Advisor",
 };
 
-export function TopHeader({ name, role }: { name: string; role: string }) {
+export function TopHeader({ name, role }: { name: string; role: Role }) {
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-[#E2E8F0] bg-white px-6">
       <span className="text-sm font-semibold text-[#102033] lg:hidden">
@@ -25,7 +26,7 @@ export function TopHeader({ name, role }: { name: string; role: string }) {
         >
           <Bell size={18} aria-hidden />
         </button>
-        <AvatarMenu name={name} roleLabel={ROLE_LABEL[role] ?? role} />
+        <AvatarMenu name={name} role={role} roleLabel={ROLE_LABEL[role] ?? role} />
       </div>
     </header>
   );

@@ -21,7 +21,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="fixed inset-0 flex overflow-hidden bg-[#F7FAFC]">
+    // overflow-clip, bukan overflow-hidden: kontainer overflow-hidden masih
+    // bisa digeser browser saat memfokuskan elemen, dan di HP itu mendorong
+    // seluruh dasbor keluar layar sehingga yang tampak hanya putih.
+    <div className="fixed inset-0 flex overflow-clip bg-[#F7FAFC]">
       <Sidebar role={session.user.role} />
       <div className="flex flex-1 flex-col overflow-hidden">
         <TopHeader name={session.user.name ?? "Pengguna"} role={session.user.role} />

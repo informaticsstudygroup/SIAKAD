@@ -12,6 +12,7 @@ import {
   Users,
   User,
   Eye,
+  Table2,
   type LucideIcon,
 } from "lucide-react";
 
@@ -42,6 +43,7 @@ const ADMIN_NAV: NavItem[] = [
   { label: "Jadwal", href: "/dashboard/jadwal", icon: CalendarDays },
   { label: "Tugas", href: "/dashboard/tugas", icon: FileText },
   { label: "Kuis", href: "/dashboard/kuis", icon: HelpCircle },
+  { label: "Rekap Nilai", href: "/dashboard/rekap-nilai", icon: Table2 },
   { label: "Profil", href: "/dashboard/profil", icon: User },
 ];
 
@@ -52,6 +54,7 @@ const MENTOR_NAV: NavItem[] = [
   { label: "Jadwal", href: "/dashboard/jadwal", icon: CalendarDays },
   { label: "Tugas", href: "/dashboard/tugas", icon: FileText },
   { label: "Kuis", href: "/dashboard/kuis", icon: HelpCircle },
+  { label: "Rekap Nilai", href: "/dashboard/rekap-nilai", icon: Table2 },
   { label: "Profil", href: "/dashboard/profil", icon: User },
 ];
 
@@ -62,6 +65,7 @@ const ADVISOR_NAV: NavItem[] = [
   { label: "Jadwal", href: "/dashboard/jadwal", icon: CalendarDays },
   { label: "Tugas", href: "/dashboard/tugas", icon: FileText },
   { label: "Kuis", href: "/dashboard/kuis", icon: HelpCircle },
+  { label: "Rekap Nilai", href: "/dashboard/rekap-nilai", icon: Table2 },
   { label: "Profil", href: "/dashboard/profil", icon: User },
 ];
 
@@ -69,6 +73,9 @@ const DEFAULT_NAV: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Profil", href: "/dashboard/profil", icon: User },
 ];
+
+/** Jumlah menu yang muat di bilah bawah layar HP. Sisanya ada di menu avatar. */
+export const BOTTOM_NAV_LIMIT = 5;
 
 export function getNavItemsForRole(role: Role): NavItem[] {
   if (role === "PARTICIPANT") return PARTICIPANT_NAV;

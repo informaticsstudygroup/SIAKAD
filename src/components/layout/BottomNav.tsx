@@ -4,11 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { Role } from "@prisma/client";
 import { cn } from "@/utils/cn";
-import { getNavItemsForRole } from "@/components/layout/nav-config";
+import { BOTTOM_NAV_LIMIT, getNavItemsForRole } from "@/components/layout/nav-config";
 
 export function BottomNav({ role }: { role: Role }) {
   const pathname = usePathname();
-  const visibleItems = getNavItemsForRole(role).slice(0, 5);
+  const visibleItems = getNavItemsForRole(role).slice(0, BOTTOM_NAV_LIMIT);
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-20 flex border-t border-[#E2E8F0] bg-white lg:hidden">

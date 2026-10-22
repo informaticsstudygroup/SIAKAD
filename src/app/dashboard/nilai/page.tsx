@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { LineChart } from "lucide-react";
+import { FileText, HelpCircle } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { requireRole } from "@/lib/auth-guards";
 import { prisma } from "@/lib/prisma";
@@ -19,16 +19,22 @@ import { cn } from "@/utils/cn";
 
 export const metadata: Metadata = { title: "Nilai" };
 
+function averageOf(values: number[]) {
+  return values.length
+    ? Math.round(values.reduce((sum, v) => sum + v, 0) / values.length)
+    : 0;
+}
+
 export default async function NilaiPage() {
   const session = await auth();
   const user = requireRole(session, ["PARTICIPANT"]);
 
   const profile = await prisma.participantProfile.findUnique({
     where: { userId: user.id },
-    select: { id: true },
+    select: { id: true, batchId: true },
   });
 
-  const [submissions, attendances] = await Promise.all([
+  const [submissions, attendances, quizAttempts, quizTotal] = await Promise.all([
     profile
       ? prisma.submission.findMany({
           where: { participantId: profile.id },
@@ -51,14 +57,35 @@ export default async function NilaiPage() {
           select: { status: true },
         })
       : Promise.resolve([]),
+    // Hanya kuis yang sudah dikumpulkan; percobaan yang masih berjalan belum
+    // punya nilai.
+    profile
+      ? prisma.quizAttempt.findMany({
+          where: { participantId: profile.id, submittedAt: { not: null } },
+          select: {
+            id: true,
+            score: true,
+            submittedAt: true,
+            quiz: { select: { title: true, topic: true } },
+          },
+          orderBy: { submittedAt: "desc" },
+        })
+      : Promise.resolve([]),
+    profile?.batchId
+      ? prisma.quiz.count({
+          where: { batchId: profile.batchId, status: { not: "DRAFT" } },
+        })
+      : Promise.resolve(0),
   ]);
 
-  const graded = submissions.filter((s) => s.score !== null);
-  const average = graded.length
-    ? Math.round(graded.reduce((sum, s) => sum + (s.score ?? 0), 0) / graded.length)
-    : 0;
-  const highest = graded.length ? Math.max(...graded.map((s) => s.score ?? 0)) : 0;
-  const lowest = graded.length ? Math.min(...graded.map((s) => s.score ?? 0)) : 0;
+  const taskScores = submissions
+    .map((s) => s.score)
+    .filter((v): v is number => v !== null);
+  const quizScores = quizAttempts
+    .map((a) => a.score)
+    .filter((v): v is number => v !== null);
+  const taskAverage = averageOf(taskScores);
+  const quizAverage = averageOf(quizScores);
 
   const hadir = attendances.filter((a) => a.status === "HADIR").length;
   const attendancePercent = attendances.length
@@ -70,24 +97,29 @@ export default async function NilaiPage() {
       <div>
         <h1 className="text-2xl font-extrabold tracking-tight text-isg-ink">Nilai</h1>
         <p className="text-sm text-isg-muted">
-          Rekap nilai tugas dan proyek yang sudah dinilai mentor.
+          Rekap nilai kuis, tugas, dan proyek milikmu.
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatTile
-          label="Rata-rata Nilai"
-          value={graded.length ? `${average}` : "—"}
-          badge={`${graded.length} dinilai`}
+          label="Rata-rata Tugas"
+          value={taskScores.length ? `${taskAverage}` : "—"}
+          badge={`${taskScores.length} dinilai`}
           tone="hero"
         />
-        <StatTile label="Nilai Tertinggi" value={graded.length ? `${highest}` : "—"} tone="mint" />
-        <StatTile label="Nilai Terendah" value={graded.length ? `${lowest}` : "—"} tone="blue" />
         <StatTile
-          label="Kehadiran"
-          value={`${attendancePercent}%`}
-          tone="cyan"
+          label="Rata-rata Kuis"
+          value={quizScores.length ? `${quizAverage}` : "—"}
+          badge={`${quizScores.length} kuis`}
+          tone="blue"
         />
+        <StatTile
+          label="Kuis Dikerjakan"
+          value={`${quizAttempts.length}/${quizTotal}`}
+          tone="mint"
+        />
+        <StatTile label="Kehadiran" value={`${attendancePercent}%`} tone="cyan" />
       </div>
 
       <div className="rounded-card border border-isg-line bg-isg-surface p-5">
@@ -102,72 +134,135 @@ export default async function NilaiPage() {
             tone={attendancePercent >= ATTENDANCE_TARGET ? "success" : "warning"}
           />
           <Meter
-            label={`Rata-rata nilai (minimum ${SCORE_TARGET})`}
-            percent={average}
-            valueLabel={graded.length ? `${average}` : "belum ada"}
-            tone={average >= SCORE_TARGET ? "success" : "warning"}
+            label={`Rata-rata nilai tugas (minimum ${SCORE_TARGET})`}
+            percent={taskAverage}
+            valueLabel={taskScores.length ? `${taskAverage}` : "belum ada"}
+            tone={taskAverage >= SCORE_TARGET ? "success" : "warning"}
           />
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-card border border-isg-line bg-isg-surface">
-        {submissions.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 p-14 text-center">
-            <LineChart size={30} aria-hidden className="text-isg-muted" />
-            <p className="text-sm font-semibold text-isg-ink">Belum ada nilai</p>
-            <p className="max-w-xs text-sm text-isg-muted">
-              Nilai akan muncul di sini setelah kamu mengumpulkan tugas dan mentor
-              menilainya.
-            </p>
-          </div>
-        ) : (
-          <ul className="divide-y divide-isg-line">
-            {submissions.map((row) => (
-              <li key={row.id} className="flex items-center justify-between gap-4 p-5">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-isg-tint px-2.5 py-1 text-xs font-bold text-isg-ink-soft">
-                      {ASSIGNMENT_CATEGORY_LABEL[row.assignment.category]}
+      <section className="flex flex-col gap-3" aria-labelledby="nilai-kuis">
+        <h2 id="nilai-kuis" className="text-base font-extrabold text-isg-ink">
+          Kuis{" "}
+          <span className="font-medium text-isg-muted">({quizAttempts.length})</span>
+        </h2>
+        <div className="overflow-hidden rounded-card border border-isg-line bg-isg-surface">
+          {quizAttempts.length === 0 ? (
+            <EmptyState
+              icon={<HelpCircle size={30} aria-hidden className="text-isg-muted" />}
+              title="Belum ada nilai kuis"
+              description="Nilai muncul di sini setelah kamu mengumpulkan kuis."
+            />
+          ) : (
+            <ul className="divide-y divide-isg-line">
+              {quizAttempts.map((attempt) => (
+                <li key={attempt.id} className="flex items-center justify-between gap-4 p-5">
+                  <div className="min-w-0">
+                    <span className="rounded-full bg-isg-blue/10 px-2.5 py-1 text-xs font-bold text-isg-blue">
+                      {attempt.quiz.topic}
                     </span>
-                    <span
-                      className={cn(
-                        "rounded-full px-2.5 py-1 text-xs font-bold",
-                        SUBMISSION_STATUS_TONE[row.status],
-                      )}
-                    >
-                      {SUBMISSION_STATUS_LABEL[row.status]}
-                    </span>
-                  </div>
-                  <p className="mt-1.5 truncate font-bold text-isg-ink">
-                    {row.assignment.title}
-                  </p>
-                  <p className="text-xs text-isg-muted">
-                    Dikumpulkan {formatDeadline(row.submittedAt)}
-                  </p>
-                  {row.feedback ? (
-                    <p className="mt-2 rounded-xl bg-isg-tint p-3 text-sm text-isg-ink-soft">
-                      &ldquo;{row.feedback}&rdquo;
+                    <p className="mt-1.5 truncate font-bold text-isg-ink">
+                      {attempt.quiz.title}
                     </p>
-                  ) : null}
-                </div>
+                    {attempt.submittedAt ? (
+                      <p className="text-xs text-isg-muted">
+                        Dikumpulkan {formatDeadline(attempt.submittedAt)}
+                      </p>
+                    ) : null}
+                  </div>
+                  <ScoreValue value={attempt.score} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
 
-                <span
-                  className={cn(
-                    "shrink-0 text-3xl font-extrabold tabular-nums",
-                    row.score === null
-                      ? "text-isg-muted"
-                      : row.score >= SCORE_TARGET
-                        ? "text-isg-ok"
-                        : "text-isg-warn",
-                  )}
-                >
-                  {row.score ?? "—"}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      <section className="flex flex-col gap-3" aria-labelledby="nilai-tugas">
+        <h2 id="nilai-tugas" className="text-base font-extrabold text-isg-ink">
+          Tugas &amp; Proyek{" "}
+          <span className="font-medium text-isg-muted">({submissions.length})</span>
+        </h2>
+        <div className="overflow-hidden rounded-card border border-isg-line bg-isg-surface">
+          {submissions.length === 0 ? (
+            <EmptyState
+              icon={<FileText size={30} aria-hidden className="text-isg-muted" />}
+              title="Belum ada nilai tugas"
+              description="Nilai muncul di sini setelah kamu mengumpulkan tugas dan mentor menilainya."
+            />
+          ) : (
+            <ul className="divide-y divide-isg-line">
+              {submissions.map((row) => (
+                <li key={row.id} className="flex items-center justify-between gap-4 p-5">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded-full bg-isg-tint px-2.5 py-1 text-xs font-bold text-isg-ink-soft">
+                        {ASSIGNMENT_CATEGORY_LABEL[row.assignment.category]}
+                      </span>
+                      <span
+                        className={cn(
+                          "rounded-full px-2.5 py-1 text-xs font-bold",
+                          SUBMISSION_STATUS_TONE[row.status],
+                        )}
+                      >
+                        {SUBMISSION_STATUS_LABEL[row.status]}
+                      </span>
+                    </div>
+                    <p className="mt-1.5 truncate font-bold text-isg-ink">
+                      {row.assignment.title}
+                    </p>
+                    <p className="text-xs text-isg-muted">
+                      Dikumpulkan {formatDeadline(row.submittedAt)}
+                    </p>
+                    {row.feedback ? (
+                      <p className="mt-2 rounded-xl bg-isg-tint p-3 text-sm text-isg-ink-soft">
+                        &ldquo;{row.feedback}&rdquo;
+                      </p>
+                    ) : null}
+                  </div>
+                  <ScoreValue value={row.score} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function ScoreValue({ value }: { value: number | null }) {
+  return (
+    <span
+      className={cn(
+        "shrink-0 text-3xl font-extrabold tabular-nums",
+        value === null
+          ? "text-isg-muted"
+          : value >= SCORE_TARGET
+            ? "text-isg-ok"
+            : "text-isg-warn",
+      )}
+    >
+      {value ?? "—"}
+    </span>
+  );
+}
+
+function EmptyState({
+  icon,
+  title,
+  description,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-3 p-12 text-center">
+      {icon}
+      <p className="text-sm font-semibold text-isg-ink">{title}</p>
+      <p className="max-w-xs text-sm text-isg-muted">{description}</p>
     </div>
   );
 }

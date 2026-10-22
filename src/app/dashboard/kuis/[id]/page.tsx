@@ -30,7 +30,7 @@ export default async function KelolaKuisPage({
     where: { id },
     include: {
       batch: { select: { name: true } },
-      questions: { orderBy: { order: "asc" } },
+      questions: { orderBy: [{ order: "asc" }, { id: "asc" }] },
       attempts: {
         where: { submittedAt: { not: null } },
         select: {
@@ -101,7 +101,11 @@ export default async function KelolaKuisPage({
         </p>
       </div>
 
-      <QuestionEditor quizId={quiz.id} questions={questions} />
+      <QuestionEditor
+        quizId={quiz.id}
+        questions={questions}
+        attemptCount={quiz.attempts.length}
+      />
 
       <div className="flex flex-col gap-3">
         <h2 className="text-base font-extrabold text-isg-ink">

@@ -26,7 +26,7 @@ export default async function KerjakanKuisPage({
 
   const quiz = await prisma.quiz.findUnique({
     where: { id },
-    include: { questions: { orderBy: { order: "asc" } } },
+    include: { questions: { orderBy: [{ order: "asc" }, { id: "asc" }] } },
   });
   if (!quiz) notFound();
 
@@ -43,10 +43,14 @@ export default async function KerjakanKuisPage({
 
   // Waktu mulai dicatat di server saat pertama membuka, supaya menutup tab
   // tidak mengulang hitung mundur dari awal.
+  // upsert, bukan create: dua tab yang dibuka bersamaan sama-sama melihat
+  // `existing` kosong, dan create kedua gagal karena kunci unik.
   const attempt =
     existing ??
-    (await prisma.quizAttempt.create({
-      data: { quizId: quiz.id, participantId: profile.id, answers: {} },
+    (await prisma.quizAttempt.upsert({
+      where: { quizId_participantId: { quizId: quiz.id, participantId: profile.id } },
+      create: { quizId: quiz.id, participantId: profile.id, answers: {} },
+      update: {},
       select: { startedAt: true, submittedAt: true },
     }));
 
@@ -64,6 +68,7 @@ export default async function KerjakanKuisPage({
         title={quiz.title}
         durationMinutes={quiz.durationMinutes}
         startedAt={attempt.startedAt.toISOString()}
+        endAt={quiz.endAt.toISOString()}
         questions={quiz.questions.map((q) => ({
           id: q.id,
           text: q.text,

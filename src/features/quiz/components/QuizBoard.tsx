@@ -167,9 +167,12 @@ export function QuizBoard({
                       </button>
                     </>
                   ) : submitted ? (
-                    <span className="rounded-full bg-isg-tint px-5 py-2.5 text-sm font-bold text-isg-muted">
-                      Sudah dikerjakan
-                    </span>
+                    <Link
+                      href="/dashboard/nilai"
+                      className="rounded-full border border-isg-line px-5 py-2.5 text-sm font-bold text-isg-ink transition-colors hover:bg-isg-tint"
+                    >
+                      Lihat Nilai
+                    </Link>
                   ) : open && quiz._count.questions > 0 ? (
                     <Link
                       href={`/dashboard/kuis/${quiz.id}/kerjakan`}

@@ -46,6 +46,30 @@ export const QUIZ_STATUS_TONE: Record<QuizStatus, string> = {
 
 export const OPTION_LABELS = ["A", "B", "C", "D"];
 
+/**
+ * ID pilihan yang tersimpan di jawaban peserta. ID pilihan tidak ikut berubah
+ * saat soal diedit, supaya jawaban lama tetap menunjuk pilihan yang sama.
+ */
+export const OPTION_IDS = ["a", "b", "c", "d"] as const;
+
+/** Nilai 0–100 dari bobot poin soal yang dijawab benar. */
+export function gradeAnswers(
+  questions: { id: string; correctOption: string; points: number }[],
+  answers: Record<string, string>,
+) {
+  const totalPoints = questions.reduce((sum, q) => sum + q.points, 0);
+  let earned = 0;
+  let correct = 0;
+  for (const question of questions) {
+    if (answers[question.id] === question.correctOption) {
+      earned += question.points;
+      correct += 1;
+    }
+  }
+  const score = totalPoints ? Math.round((earned / totalPoints) * 100) : 0;
+  return { score, correct };
+}
+
 /** Kuis bisa dikerjakan kalau aktif dan sekarang berada di rentang waktunya. */
 export function isQuizOpen(quiz: { status: QuizStatus; startAt: Date; endAt: Date }) {
   const now = new Date();
