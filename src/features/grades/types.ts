@@ -5,6 +5,8 @@ export type GradeColumn = {
   key: string;
   kind: GradeKind;
   refId: string;
+  /** Nama pendek berurutan untuk judul kolom, misalnya "Kuis 1" atau "Tugas 3". */
+  label: string;
   title: string;
   /** Tanggal kuis dibuka atau tenggat tugas, sudah diformat. */
   dateLabel: string;
@@ -25,6 +27,12 @@ export type GradeRow = {
   name: string;
   studentId: string;
   cells: Record<string, GradeCell>;
+  /** Kehadiran dan status sertifikat, ditampilkan di halaman Pantau. */
+  progress?: {
+    attendancePercent: number | null;
+    attendanceLabel: string;
+    eligible: boolean;
+  };
 };
 
 export type GradeSheetData = {

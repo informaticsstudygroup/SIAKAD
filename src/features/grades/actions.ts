@@ -19,7 +19,7 @@ const changesSchema = z
   .max(5000, "Terlalu banyak perubahan sekaligus. Simpan sebagian dulu.");
 
 /**
- * Menyimpan perubahan dari tabel Rekap Nilai. Hanya Admin; mentor dan
+ * Menyimpan perubahan nilai dari tabel di halaman Pantau. Hanya Admin; mentor dan
  * advisor hanya bisa melihat tabelnya.
  */
 export async function saveGradeChanges(
@@ -146,14 +146,13 @@ export async function saveGradeChanges(
       ),
     ]);
 
-    revalidatePath("/dashboard/rekap-nilai");
     revalidatePath("/dashboard/pantau");
     revalidatePath("/dashboard/nilai");
     revalidatePath("/dashboard/kuis", "layout");
     revalidatePath("/dashboard/tugas", "layout");
     return { saved: changes.length };
   } catch (error) {
-    console.error("[rekap-nilai] gagal menyimpan:", error);
+    console.error("[pantau] gagal menyimpan nilai:", error);
     return {
       error: "Server sedang tidak bisa menghubungi database. Coba lagi beberapa saat lagi.",
     };

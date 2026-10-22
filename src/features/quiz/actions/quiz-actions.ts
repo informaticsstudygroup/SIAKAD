@@ -294,7 +294,7 @@ export async function deleteQuestion(
 /**
  * Menilai ulang semua jawaban yang sudah dikumpulkan memakai soal dan kunci
  * jawaban terbaru. Dipakai setelah kunci jawaban diperbaiki. Nilai yang
- * diubah manual di rekap nilai ikut tertimpa, dan itu dijelaskan di dialog
+ * diubah manual di halaman Pantau ikut tertimpa, dan itu dijelaskan di dialog
  * konfirmasinya.
  */
 export async function regradeQuiz(
@@ -331,7 +331,7 @@ export async function regradeQuiz(
   if ("error" in result) return result;
 
   revalidateQuiz(quizId);
-  revalidatePath("/dashboard/rekap-nilai");
+  revalidatePath("/dashboard/pantau");
   return { updated: result.data };
 }
 

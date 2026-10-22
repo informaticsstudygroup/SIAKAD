@@ -70,17 +70,19 @@ export async function loadGradeSheet(batchId: string): Promise<GradeSheetData> {
   ]);
 
   const columns: GradeColumn[] = [
-    ...quizzes.map((quiz) => ({
+    ...quizzes.map((quiz, index) => ({
       key: columnKey("quiz", quiz.id),
       kind: "quiz" as const,
       refId: quiz.id,
+      label: `Kuis ${index + 1}`,
       title: quiz.title,
       dateLabel: formatDate(quiz.startAt),
     })),
-    ...assignments.map((assignment) => ({
+    ...assignments.map((assignment, index) => ({
       key: columnKey("assignment", assignment.id),
       kind: "assignment" as const,
       refId: assignment.id,
+      label: `Tugas ${index + 1}`,
       title: assignment.title,
       dateLabel: formatDate(assignment.deadline),
     })),

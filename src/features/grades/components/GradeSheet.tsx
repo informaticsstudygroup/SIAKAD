@@ -48,11 +48,13 @@ export function GradeSheet({
   batchName,
   canEdit,
   scoreTarget,
+  attendanceTarget,
 }: {
   data: GradeSheetData;
   batchName: string;
   canEdit: boolean;
   scoreTarget: number;
+  attendanceTarget: number;
 }) {
   const router = useRouter();
   const tableRef = useRef<HTMLTableElement>(null);
@@ -66,6 +68,7 @@ export function GradeSheet({
   const quizColumns = data.columns.filter((c) => c.kind === "quiz");
   const assignmentColumns = data.columns.filter((c) => c.kind === "assignment");
   const columns = [...quizColumns, ...assignmentColumns];
+  const showProgress = data.rows.some((row) => row.progress);
 
   const normalizedQuery = query.trim().toLowerCase();
   const rows = normalizedQuery
@@ -193,9 +196,11 @@ export function GradeSheet({
       "No",
       "Nama",
       "NIM",
-      ...columns.map((c) => `${c.kind === "quiz" ? "Kuis" : "Tugas"}: ${c.title}`),
+      ...(showProgress ? ["Kehadiran (%)"] : []),
+      ...columns.map((c) => `${c.label}: ${c.title}`),
       "Rata-rata Kuis",
       "Rata-rata Tugas",
+      ...(showProgress ? ["Sertifikat"] : []),
     ];
     const lines = data.rows.map((row, index) => {
       const values = columns.map((column) => valueOf(row, column));
@@ -203,16 +208,18 @@ export function GradeSheet({
         String(index + 1),
         escape(row.name),
         escape(row.studentId),
+        ...(showProgress ? [num(row.progress?.attendancePercent ?? null)] : []),
         ...values.map(num),
         num(average(quizColumns.map((c) => valueOf(row, c)))),
         num(average(assignmentColumns.map((c) => valueOf(row, c)))),
+        ...(showProgress ? [row.progress?.eligible ? "Memenuhi" : "Belum"] : []),
       ].join(";");
     });
     const csv = "﻿" + [header.map(escape).join(";"), ...lines].join("\r\n");
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
     const link = document.createElement("a");
     link.href = url;
-    link.download = `rekap-nilai-${batchName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.csv`;
+    link.download = `nilai-${batchName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   }
@@ -220,21 +227,26 @@ export function GradeSheet({
   const scoreTone = (value: number | null) =>
     value === null ? "text-isg-muted" : value < scoreTarget ? "text-isg-bad" : "text-isg-ink";
 
-  if (columns.length === 0 || data.rows.length === 0) {
+  const attendanceTone = (value: number | null) =>
+    value === null
+      ? "text-isg-muted"
+      : value >= attendanceTarget
+        ? "text-isg-ok"
+        : "text-isg-warn";
+
+  if (data.rows.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-card border border-dashed border-isg-line bg-isg-surface p-14 text-center">
         <Table2 size={30} aria-hidden className="text-isg-muted" />
-        <p className="text-sm font-semibold text-isg-ink">
-          {data.rows.length === 0 ? "Belum ada peserta" : "Belum ada kuis atau tugas"}
-        </p>
+        <p className="text-sm font-semibold text-isg-ink">Belum ada peserta</p>
         <p className="max-w-xs text-sm text-isg-muted">
-          {data.rows.length === 0
-            ? "Peserta akan muncul setelah diverifikasi dan dimasukkan ke angkatan ini."
-            : "Kolom nilai muncul setelah ada kuis yang tidak berstatus draf atau tugas untuk angkatan ini."}
+          Peserta akan muncul setelah diverifikasi dan dimasukkan ke angkatan ini.
         </p>
       </div>
     );
   }
+
+  const totalColumns = columns.length + 3 + (showProgress ? 2 : 0);
 
   return (
     <div className="flex flex-col gap-4">
@@ -296,6 +308,18 @@ export function GradeSheet({
                     ({rows.length})
                   </span>
                 </th>
+                {showProgress ? (
+                  <th
+                    rowSpan={2}
+                    scope="col"
+                    className="sticky top-0 z-20 w-24 min-w-24 border-b border-r border-isg-line bg-isg-surface px-2 py-2 text-center align-bottom text-xs font-bold text-isg-ink"
+                  >
+                    Kehadiran
+                    <span className="mt-0.5 block text-[11px] font-normal text-isg-muted">
+                      min. {attendanceTarget}%
+                    </span>
+                  </th>
+                ) : null}
                 {quizColumns.length ? (
                   <GroupHeader span={quizColumns.length} tone="blue">
                     Kuis
@@ -309,16 +333,33 @@ export function GradeSheet({
                 <GroupHeader span={2} tone="ink">
                   Rata-rata
                 </GroupHeader>
+                {showProgress ? (
+                  <th
+                    rowSpan={2}
+                    scope="col"
+                    className="sticky top-0 z-20 w-28 min-w-28 border-b border-isg-line bg-isg-surface px-2 py-2 text-center align-bottom text-xs font-bold text-isg-ink"
+                  >
+                    Sertifikat
+                  </th>
+                ) : null}
               </tr>
               <tr>
                 {columns.map((column) => (
                   <th
                     key={column.key}
                     scope="col"
-                    title={column.title}
-                    className="sticky top-8 z-20 w-24 min-w-24 max-w-24 border-b border-r border-isg-line bg-isg-surface px-2 py-2 text-center align-top font-normal"
+                    title={`${column.title} · ${column.dateLabel}`}
+                    className="sticky top-8 z-20 w-28 min-w-28 max-w-28 border-b border-r border-isg-line bg-isg-surface px-2 py-2 text-center align-top font-normal"
                   >
-                    <span className="line-clamp-2 text-xs font-bold leading-tight text-isg-ink">
+                    <span
+                      className={cn(
+                        "block text-xs font-extrabold",
+                        column.kind === "quiz" ? "text-isg-blue" : "text-isg-ok",
+                      )}
+                    >
+                      {column.label}
+                    </span>
+                    <span className="mt-0.5 line-clamp-2 text-[11px] font-semibold leading-tight text-isg-ink-soft">
                       {column.title}
                     </span>
                     <span className="mt-0.5 block text-[11px] text-isg-muted">
@@ -345,7 +386,7 @@ export function GradeSheet({
               {rows.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={columns.length + 3}
+                    colSpan={totalColumns}
                     className="px-4 py-10 text-center text-sm text-isg-muted"
                   >
                     Tidak ada peserta yang cocok dengan &ldquo;{query}&rdquo;.
@@ -376,6 +417,25 @@ export function GradeSheet({
                         </span>
                       </span>
                     </th>
+
+                    {showProgress ? (
+                      <td className="border-b border-r border-isg-line px-2 text-center tabular-nums group-hover:bg-[#f6fafe]">
+                        <span
+                          className={cn(
+                            "block font-extrabold",
+                            attendanceTone(row.progress?.attendancePercent ?? null),
+                          )}
+                        >
+                          {row.progress?.attendancePercent === null ||
+                          row.progress?.attendancePercent === undefined
+                            ? "—"
+                            : `${row.progress.attendancePercent}%`}
+                        </span>
+                        <span className="block text-[11px] text-isg-muted">
+                          {row.progress?.attendanceLabel}
+                        </span>
+                      </td>
+                    ) : null}
 
                     {columns.map((column, colIndex) => {
                       const key = cellKey(row.participantId, column.key);
@@ -469,9 +529,28 @@ export function GradeSheet({
                     <td className="border-b border-r border-isg-line bg-isg-tint/60 px-2 text-center font-extrabold tabular-nums">
                       <span className={scoreTone(quizAvg)}>{quizAvg ?? "—"}</span>
                     </td>
-                    <td className="border-b border-isg-line bg-isg-tint/60 px-2 text-center font-extrabold tabular-nums">
+                    <td
+                      className={cn(
+                        "border-b border-isg-line bg-isg-tint/60 px-2 text-center font-extrabold tabular-nums",
+                        showProgress && "border-r",
+                      )}
+                    >
                       <span className={scoreTone(taskAvg)}>{taskAvg ?? "—"}</span>
                     </td>
+                    {showProgress ? (
+                      <td className="border-b border-isg-line px-2 text-center group-hover:bg-[#f6fafe]">
+                        <span
+                          className={cn(
+                            "rounded-full px-2.5 py-1 text-xs font-bold",
+                            row.progress?.eligible
+                              ? "bg-isg-ok/10 text-isg-ok"
+                              : "bg-isg-tint text-isg-muted",
+                          )}
+                        >
+                          {row.progress?.eligible ? "Memenuhi" : "Belum"}
+                        </span>
+                      </td>
+                    ) : null}
                   </tr>
                 );
               })}
@@ -486,6 +565,20 @@ export function GradeSheet({
                   >
                     Rata-rata kelas
                   </th>
+                  {showProgress
+                    ? (() => {
+                        const avg = average(
+                          rows.map((row) => row.progress?.attendancePercent ?? null),
+                        );
+                        return (
+                          <td className="sticky bottom-0 z-10 border-r border-t border-isg-line bg-isg-tint px-2 py-2.5 text-center font-extrabold tabular-nums">
+                            <span className={attendanceTone(avg)}>
+                              {avg === null ? "—" : `${avg}%`}
+                            </span>
+                          </td>
+                        );
+                      })()
+                    : null}
                   {columns.map((column) => {
                     const avg = average(rows.map((row) => valueOf(row, column)));
                     return (
@@ -506,13 +599,18 @@ export function GradeSheet({
                         key={index}
                         className={cn(
                           "sticky bottom-0 z-10 border-t border-isg-line bg-isg-line/60 px-2 py-2.5 text-center font-extrabold tabular-nums",
-                          index === 0 && "border-r",
+                          (index === 0 || showProgress) && "border-r",
                         )}
                       >
                         <span className={scoreTone(avg)}>{avg ?? "—"}</span>
                       </td>
                     );
                   })}
+                  {showProgress ? (
+                    <td className="sticky bottom-0 z-10 border-t border-isg-line bg-isg-tint px-2 py-2.5 text-center text-xs font-bold text-isg-ink">
+                      {rows.filter((row) => row.progress?.eligible).length}/{rows.length}
+                    </td>
+                  ) : null}
                 </tr>
               </tfoot>
             ) : null}

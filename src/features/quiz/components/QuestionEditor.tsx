@@ -243,7 +243,7 @@ export function QuestionEditor({
       {regrading ? (
         <ConfirmDialog
           title="Nilai ulang semua jawaban?"
-          description={`Nilai ${attemptCount} peserta dihitung ulang memakai soal dan kunci jawaban saat ini. Nilai yang pernah diubah manual di Rekap Nilai akan tertimpa.`}
+          description={`Nilai ${attemptCount} peserta dihitung ulang memakai soal dan kunci jawaban saat ini. Nilai yang pernah diubah manual di halaman Pantau akan tertimpa.`}
           confirmLabel="Nilai Ulang"
           isPending={isRegrading}
           onConfirm={confirmRegrade}
