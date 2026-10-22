@@ -1,8 +1,10 @@
 [build]
-builder = "NIXPACKS"
+builder = "RAILPACK"
+# Railway sudah tidak menjalankan Nixpacks: build dengan builder itu gagal
+# dalam satu detik tanpa log sama sekali.
 # Versi Node ditentukan lewat engines.node di package.json dan .nvmrc.
-# Next.js 16 butuh >=20.9 dan Prisma 7 butuh >=22.12; tanpa itu Nixpacks
-# menebak Node 18 dan `npm ci` gagal.
+# Next.js 16 butuh >=20.9 dan Prisma 7 butuh >=22.12; tanpa itu builder
+# menebak Node lama dan `npm ci` gagal.
 buildCommand = "npm run build"
 
 [deploy]
