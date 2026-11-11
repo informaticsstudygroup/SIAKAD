@@ -1,4 +1,5 @@
 import type { MeetingCategory } from "@prisma/client";
+import { formatLocal } from "@/lib/time";
 
 export type MeetingRow = {
   id: string;
@@ -34,9 +35,9 @@ export const MEETING_CATEGORY_TONE: Record<MeetingCategory, string> = {
   PROJECT: "bg-isg-tint text-isg-ink-soft",
 };
 
-/** "19:00 – 21:00" memakai jam lokal. */
+/** "19:00 – 21:00" dalam WITA. */
 export function formatTimeRange(start: Date, end: Date) {
   const fmt = (d: Date) =>
-    new Date(d).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+    formatLocal(d, { hour: "2-digit", minute: "2-digit" });
   return `${fmt(start)} – ${fmt(end)}`;
 }

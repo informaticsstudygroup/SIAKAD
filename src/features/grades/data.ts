@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { formatLocal } from "@/lib/time";
 import {
   columnKey,
   type GradeCell,
@@ -7,7 +8,7 @@ import {
 } from "@/features/grades/types";
 
 function formatDate(date: Date) {
-  return date.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
+  return formatLocal(date, { day: "numeric", month: "short" });
 }
 
 /** Kuis dan tugas yang dinilai untuk satu angkatan, urut menurut waktunya. */

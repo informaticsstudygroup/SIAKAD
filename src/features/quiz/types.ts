@@ -1,4 +1,5 @@
 import type { QuizStatus } from "@prisma/client";
+import { formatLocal } from "@/lib/time";
 
 /** Satu pilihan jawaban. Disimpan sebagai JSON di kolom Question.options. */
 export type QuizOption = { id: string; text: string };
@@ -82,7 +83,7 @@ export function isQuizOpen(quiz: { status: QuizStatus; startAt: Date; endAt: Dat
 
 export function formatQuizWindow(startAt: Date, endAt: Date) {
   const fmt = (d: Date) =>
-    new Date(d).toLocaleString("id-ID", {
+    formatLocal(d, {
       day: "numeric",
       month: "short",
       hour: "2-digit",

@@ -1,4 +1,5 @@
 import type { AssignmentCategory, SubmissionStatus } from "@prisma/client";
+import { formatLocal } from "@/lib/time";
 
 export type AssignmentRow = {
   id: string;
@@ -43,7 +44,7 @@ export const SUBMISSION_STATUS_TONE: Record<SubmissionStatus, string> = {
 
 /** "15 Sep 2026, 23:59" */
 export function formatDeadline(date: Date) {
-  return new Date(date).toLocaleString("id-ID", {
+  return formatLocal(date, {
     day: "numeric",
     month: "short",
     year: "numeric",

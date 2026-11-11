@@ -5,6 +5,7 @@ import crypto from "node:crypto";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { localParts } from "@/lib/time";
 import {
   CAMPUS_EMAIL_DOMAIN,
   DEFAULT_STUDY_PROGRAM,
@@ -55,8 +56,10 @@ const registerSchema = z
 export type RegisterFormState = { error?: string };
 
 function generateRegistrationNumber() {
-  const now = new Date();
-  const yyyymm = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
+  // Bulan menurut WITA: server berjalan di UTC, jadi pendaftar tanggal 1
+  // sebelum jam 08:00 dulu tercatat di bulan sebelumnya.
+  const now = localParts(new Date());
+  const yyyymm = `${now.year}${String(now.month).padStart(2, "0")}`;
   const random = Math.random().toString(36).slice(2, 7).toUpperCase();
   return `ISG-${yyyymm}-${random}`;
 }

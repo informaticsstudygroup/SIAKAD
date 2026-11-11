@@ -11,6 +11,7 @@ import {
 } from "@/features/attendance/actions/session-actions";
 import { setAttendanceOpen } from "@/features/schedule/actions/meeting-actions";
 import { ROTATE_SECONDS } from "@/features/attendance/qr-token";
+import { formatLocal } from "@/lib/time";
 import { cn } from "@/utils/cn";
 
 /**
@@ -266,7 +267,7 @@ export function AttendanceQrPanel({
                   </span>
                   {row.at ? (
                     <span className="shrink-0 font-mono text-xs text-isg-muted">
-                      {new Date(row.at).toLocaleTimeString("id-ID", {
+                      {formatLocal(row.at, {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}

@@ -12,6 +12,7 @@ import {
   type BatchOption,
   type MeetingRow,
 } from "@/features/schedule/types";
+import { toLocalDateInput, toLocalTimeInput } from "@/lib/time";
 import { cn } from "@/utils/cn";
 
 const initialState: MeetingFormState = {};
@@ -19,17 +20,9 @@ const initialState: MeetingFormState = {};
 const inputClass =
   "h-11 w-full rounded-xl border border-isg-line bg-isg-surface px-3.5 text-sm text-isg-ink outline-none transition-colors placeholder:text-isg-muted/70 focus:border-isg-blue focus:ring-4 focus:ring-isg-blue/15";
 
-/** Date -> "YYYY-MM-DD" dan "HH:mm" memakai jam lokal, bukan UTC. */
-function toDateValue(date: Date) {
-  const d = new Date(date);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-}
-function toTimeValue(date: Date) {
-  const d = new Date(date);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
+// Selalu WITA, bukan zona waktu perangkat: server membaca form sebagai WITA.
+const toDateValue = toLocalDateInput;
+const toTimeValue = toLocalTimeInput;
 
 export function MeetingFormDrawer({
   meeting,

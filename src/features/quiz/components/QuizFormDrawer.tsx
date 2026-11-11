@@ -5,6 +5,7 @@ import { CircleAlert } from "lucide-react";
 import { Drawer } from "@/components/ui/Drawer";
 import { saveQuiz, type QuizFormState } from "@/features/quiz/actions/quiz-actions";
 import { QUIZ_STATUS_LABEL, type QuizRow } from "@/features/quiz/types";
+import { toLocalDateInput, toLocalTimeInput } from "@/lib/time";
 import { cn } from "@/utils/cn";
 
 const initialState: QuizFormState = {};
@@ -12,15 +13,9 @@ const initialState: QuizFormState = {};
 const inputClass =
   "h-11 w-full rounded-xl border border-isg-line bg-isg-surface px-3.5 text-sm text-isg-ink outline-none transition-colors placeholder:text-isg-muted/70 focus:border-isg-blue focus:ring-4 focus:ring-isg-blue/15";
 
-const pad = (n: number) => String(n).padStart(2, "0");
-const toDate = (d: Date) => {
-  const x = new Date(d);
-  return `${x.getFullYear()}-${pad(x.getMonth() + 1)}-${pad(x.getDate())}`;
-};
-const toTime = (d: Date) => {
-  const x = new Date(d);
-  return `${pad(x.getHours())}:${pad(x.getMinutes())}`;
-};
+// Selalu WITA, bukan zona waktu perangkat: server membaca form sebagai WITA.
+const toDate = toLocalDateInput;
+const toTime = toLocalTimeInput;
 
 export function QuizFormDrawer({
   quiz,

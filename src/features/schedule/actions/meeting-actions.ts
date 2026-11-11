@@ -6,6 +6,7 @@ import { MeetingCategory } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { canManageBatch, getManagedBatchScope } from "@/lib/scope";
+import { fromLocalInput } from "@/lib/time";
 
 export type MeetingFormState = { error?: string; success?: boolean };
 
@@ -30,9 +31,9 @@ async function guard<T>(label: string, run: () => Promise<T>) {
   }
 }
 
-/** Menggabungkan tanggal (YYYY-MM-DD) dan jam (HH:mm) jadi satu Date lokal. */
+/** Menggabungkan tanggal (YYYY-MM-DD) dan jam (HH:mm) WITA jadi satu Date. */
 function combine(date: string, time: string) {
-  return new Date(`${date}T${time}:00`);
+  return fromLocalInput(date, time);
 }
 
 const meetingSchema = z

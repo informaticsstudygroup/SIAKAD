@@ -5,6 +5,7 @@ import { z } from "zod";
 import { AssignmentCategory } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { fromLocalInput } from "@/lib/time";
 
 export type AssignmentFormState = { error?: string; success?: boolean };
 
@@ -58,7 +59,7 @@ export async function saveAssignment(
 
   const data = {
     ...rest,
-    deadline: new Date(`${deadlineDate}T${deadlineTime}:00`),
+    deadline: fromLocalInput(deadlineDate, deadlineTime),
     meetingId: meetingId || null,
     attachmentUrl: attachmentUrl || null,
     mentorId: session.user.id,

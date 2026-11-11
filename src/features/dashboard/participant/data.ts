@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { formatLocal, localParts } from "@/lib/time";
 import type { MonthlyAttendance } from "@/features/dashboard/participant/components/AttendanceBarChart";
 import type { GradeTrendData } from "@/features/dashboard/participant/components/GradeTrendChart";
 import type { ScheduleItem } from "@/features/dashboard/participant/components/UpcomingScheduleCard";
@@ -139,11 +140,11 @@ export async function loadParticipantDashboard(
 
   const byMonth = new Map<string, MonthlyAttendance>();
   for (const row of attendances) {
-    const d = new Date(row.meeting.date);
-    const key = `${d.getFullYear()}-${d.getMonth()}`;
+    const d = localParts(row.meeting.date);
+    const key = `${d.year}-${d.month}`;
     const entry =
       byMonth.get(key) ??
-      { month: MONTH_ID[d.getMonth()], hadir: 0, izin: 0, tidakHadir: 0 };
+      { month: MONTH_ID[d.month - 1], hadir: 0, izin: 0, tidakHadir: 0 };
     if (row.status === "HADIR") entry.hadir += 1;
     else if (row.status === "IZIN") entry.izin += 1;
     else entry.tidakHadir += 1;
@@ -180,17 +181,17 @@ export async function loadParticipantDashboard(
 
   // ----- Jadwal terdekat -----
   const upcoming: ScheduleItem[] = upcomingMeetings.map((meeting) => {
-    const d = new Date(meeting.date);
+    const d = localParts(meeting.date);
     return {
       id: meeting.id,
       title: meeting.title,
       category: meeting.category,
-      time: new Date(meeting.startTime).toLocaleTimeString("id-ID", {
+      time: formatLocal(meeting.startTime, {
         hour: "2-digit",
         minute: "2-digit",
       }),
-      day: String(d.getDate()),
-      month: MONTH_ID[d.getMonth()],
+      day: String(d.day),
+      month: MONTH_ID[d.month - 1],
     };
   });
 
@@ -199,7 +200,7 @@ export async function loadParticipantDashboard(
     ...attendances.slice(-5).map((row, index) => ({
       id: `att-${index}`,
       title: `Presensi "${row.meeting.title}" tercatat`,
-      date: new Date(row.recordedAt).toLocaleDateString("id-ID", {
+      date: formatLocal(row.recordedAt, {
         day: "numeric",
         month: "short",
         year: "numeric",
@@ -213,7 +214,7 @@ export async function loadParticipantDashboard(
         row.status === "SUDAH_DINILAI"
           ? `Tugas "${row.assignment.title}" dinilai`
           : `Tugas "${row.assignment.title}" dikumpulkan`,
-      date: new Date(row.submittedAt).toLocaleDateString("id-ID", {
+      date: formatLocal(row.submittedAt, {
         day: "numeric",
         month: "short",
         year: "numeric",

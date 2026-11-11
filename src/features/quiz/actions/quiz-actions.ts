@@ -6,6 +6,7 @@ import { QuizStatus } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { canManageBatch, getManagedBatchScope } from "@/lib/scope";
+import { fromLocalInput } from "@/lib/time";
 import { OPTION_IDS, gradeAnswers, type QuizOption } from "@/features/quiz/types";
 
 export type QuizFormState = { error?: string; success?: boolean };
@@ -71,8 +72,7 @@ const quizSchema = z
   })
   .refine(
     (d) =>
-      new Date(`${d.endDate}T${d.endTime}:00`) >
-      new Date(`${d.startDate}T${d.startTime}:00`),
+      fromLocalInput(d.endDate, d.endTime) > fromLocalInput(d.startDate, d.startTime),
     { message: "Waktu berakhir harus setelah waktu mulai.", path: ["endTime"] },
   );
 
@@ -94,8 +94,8 @@ export async function saveQuiz(
   const data = {
     ...rest,
     instructions: instructions || null,
-    startAt: new Date(`${startDate}T${startTime}:00`),
-    endAt: new Date(`${endDate}T${endTime}:00`),
+    startAt: fromLocalInput(startDate, startTime),
+    endAt: fromLocalInput(endDate, endTime),
     createdById: session.user.id,
   };
 

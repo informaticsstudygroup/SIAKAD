@@ -12,6 +12,7 @@ import {
   type AssignmentRow,
   type MeetingOption,
 } from "@/features/assignment/types";
+import { toLocalDateInput, toLocalTimeInput } from "@/lib/time";
 import { cn } from "@/utils/cn";
 
 const initialState: AssignmentFormState = {};
@@ -19,17 +20,9 @@ const initialState: AssignmentFormState = {};
 const inputClass =
   "h-11 w-full rounded-xl border border-isg-line bg-isg-surface px-3.5 text-sm text-isg-ink outline-none transition-colors placeholder:text-isg-muted/70 focus:border-isg-blue focus:ring-4 focus:ring-isg-blue/15";
 
-function pad(n: number) {
-  return String(n).padStart(2, "0");
-}
-function toDateValue(d: Date) {
-  const x = new Date(d);
-  return `${x.getFullYear()}-${pad(x.getMonth() + 1)}-${pad(x.getDate())}`;
-}
-function toTimeValue(d: Date) {
-  const x = new Date(d);
-  return `${pad(x.getHours())}:${pad(x.getMinutes())}`;
-}
+// Selalu WITA, bukan zona waktu perangkat: server membaca form sebagai WITA.
+const toDateValue = toLocalDateInput;
+const toTimeValue = toLocalTimeInput;
 
 export function AssignmentFormDrawer({
   assignment,
